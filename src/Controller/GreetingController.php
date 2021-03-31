@@ -11,7 +11,7 @@ final class GreetingController extends AbstractController
 {
     public function staticallyGreetAction(?string $name): Response
     {
-        return $this->render('@AhmedkhdSyliusBotPlugin/static_greeting.html.twig', ['greeting' => $this->getGreeting($name)]);
+        return $this->render('@AhmedkhdSyliusBotPlugin/base.html.twig', ['greeting' => $this->getGreeting($name)]);
     }
 
     public function dynamicallyGreetAction(?string $name): Response

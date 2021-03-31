@@ -1,0 +1,26 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block title %}Translation | Sylius{% endblock %}
+
+{% block stylesheets %}
+    {% include '@SyliusUi/_stylesheets.html.twig' with {
+        'path' : 'assets/admin/css/style.css'
+    } %}
+{#    {{ encore_entry_link_tags('app') }}#}
+    {{ sonata_block_render_event('sylius.admin.layout.stylesheets') }}
+{% endblock %}
+
+{% block javascripts %}
+    {% include '@SyliusUi/_javascripts.html.twig' with {
+        'path' : 'assets/admin/js/app.js'
+    } %}
+    {{ sonata_block_render_event('sylius.admin.layout.javascripts') }}
+{#    {{ encore_entry_script_tags('js/app') }}#}
+    <script src="{{ asset('build/js/app.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div id="app">
+        <example></example>
+    </div>
+{% endblock %}

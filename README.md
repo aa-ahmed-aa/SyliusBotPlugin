@@ -110,3 +110,13 @@ To be able to setup a plugin's database, remember to configure you database cred
     (cd tests/Application && APP_ENV=dev bin/console sylius:fixtures:load)
     (cd tests/Application && APP_ENV=dev symfony server:start)
     ```
+
+## install this package to sylius application 
+```bash 
+$ composer require aa-ahmed-aa/SyliusBotPlugin
+```
+apeend to `config/bundle.php` 
+```php
+Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
+```
+

@@ -1,1 +1,6 @@
 # Define your own admin routes here
+ahmedkhd_sylius_bot_plugin_admin_bots_messenger:
+  path: /bots/messenger
+  defaults:
+    _controller: Ahmedkhd\SyliusBotPlugin\Controller\GreetingController::staticallyGreetAction
+    name: ~

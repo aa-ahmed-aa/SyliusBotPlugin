@@ -1,0 +1,10 @@
+services:
+    Ahmedkhd\SyliusBotPlugin\Controller\GreetingController:
+        autowire: true
+        public: true
+        autoconfigure: true
+
+    ahmedkhd_sylius_bot_plugin.listener.admin.menu_builder:
+        class: Ahmedkhd\SyliusBotPlugin\Menu\MenuBuilderListener
+        tags:
+            - { name: kernel.event_listener, event: sylius.menu.admin.main, method: addAdminMenuItems }
