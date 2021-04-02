@@ -19,6 +19,11 @@ final class GreetingController extends AbstractController
         return $this->render('@AhmedkhdSyliusBotPlugin/dynamic_greeting.html.twig', ['greeting' => $this->getGreeting($name)]);
     }
 
+    public function connectMessageAction(): Response
+    {
+        return $this->render('@AhmedkhdSyliusBotPlugin/connect_messenger.html.twig', ['greeting' => $this->getGreeting("aaaaa")]);
+    }
+
     private function getGreeting(?string $name): string
     {
         switch ($name) {
