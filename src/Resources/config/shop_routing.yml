@@ -3,11 +3,11 @@
 ahmedkhd_sylius_bot_static_welcome:
     path: /static-welcome/{name}
     defaults:
-        _controller: Ahmedkhd\SyliusBotPlugin\Controller\GreetingController::staticallyGreetAction
+        _controller: ahmedkhd_sylius_bot_plugin.controller.bots:staticallyGreetAction
         name: ~
 
 ahmedkhd_sylius_bot_dynamic_welcome:
     path: /dynamic-welcome/{name}
     defaults:
-        _controller: Ahmedkhd\SyliusBotPlugin\Controller\GreetingController::dynamicallyGreetAction
+        _controller: ahmedkhd_sylius_bot_plugin.controller.bots:dynamicallyGreetAction
         name: ~
