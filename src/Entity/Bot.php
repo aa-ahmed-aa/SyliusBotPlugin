@@ -15,6 +15,7 @@ class Bot implements BotInterface
     use TimestampableEntity;
 
     /**
+     * @var integer
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -22,36 +23,43 @@ class Bot implements BotInterface
     protected $id;
 
     /**
+     * @var string
      * @ORM\Column(name="page_name", type="string", length=255, nullable=true)
      */
     protected $page_name;
 
     /**
+     * @var string
      * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
      */
     protected $paige_access_token;
 
     /**
+     * @var string
      * @ORM\Column(name="page_id", type="string", length=255, nullable=true)
      */
     protected $page_id;
 
     /**
+     * @var string
      * @ORM\Column(name="page_image_url", type="string", length=255, nullable=true)
      */
     protected $page_image_url;
 
     /**
+     * @var string
      * @ORM\Column(name="disabled", type="boolean", options={"default": false})
      */
-    protected $disabled = false;
+    protected $disabled;
 
     /**
+     * @var string
      * @ORM\Column(name="channel_type", type="string", length=255, nullable=true)
      */
     protected $channel_type;
 
     /**
+     * @var string
      * @ORM\Column(name="timezone", type="string", length=255, nullable=true)
      */
     protected $timezone;
@@ -65,9 +73,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $page_name
+     * @param string $page_name
      */
-    public function setPageName($page_name): void
+    public function setPageName(string $page_name): void
     {
         $this->page_name = $page_name;
     }
@@ -81,9 +89,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $page_id
+     * @param string $page_id
      */
-    public function setPageId($page_id): void
+    public function setPageId(string $page_id): void
     {
         $this->page_id = $page_id;
     }
@@ -97,9 +105,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $paige_access_token
+     * @param string $paige_access_token
      */
-    public function setPaigeAccessToken($paige_access_token): void
+    public function setPaigeAccessToken(string $paige_access_token): void
     {
         $this->paige_access_token = $paige_access_token;
     }
@@ -113,9 +121,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $page_image_url
+     * @param string $page_image_url
      */
-    public function setPageImageUrl($page_image_url): void
+    public function setPageImageUrl(string $page_image_url): void
     {
         $this->page_image_url = $page_image_url;
     }
@@ -129,9 +137,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $disabled
+     * @param string $disabled
      */
-    public function setDisabled($disabled): void
+    public function setDisabled(string $disabled): void
     {
         $this->disabled = $disabled;
     }
@@ -145,9 +153,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $channel_type
+     * @param string $channel_type
      */
-    public function setChannelType($channel_type): void
+    public function setChannelType(string $channel_type): void
     {
         $this->channel_type = $channel_type;
     }
@@ -161,9 +169,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param mixed $timezone
+     * @param string $timezone
      */
-    public function setTimezone($timezone): void
+    public function setTimezone(string $timezone): void
     {
         $this->timezone = $timezone;
     }

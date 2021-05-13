@@ -14,9 +14,9 @@ interface BotInterface extends ResourceInterface
     public function getId();
 
     /**
-     * @param $page_name
+     * @param string $page_name
      */
-    public function setPageName($page_name): void;
+    public function setPageName(string $page_name): void;
 
     /**
      * @return mixed
@@ -24,9 +24,9 @@ interface BotInterface extends ResourceInterface
     public function getPageName();
 
     /**
-     * @param $page_id
+     * @param string $page_id
      */
-    public function setPageId($page_id): void;
+    public function setPageId(string $page_id): void;
 
     /**
      * @return mixed
@@ -34,9 +34,9 @@ interface BotInterface extends ResourceInterface
     public function getPageId();
 
     /**
-     * @param $paige_access_token
+     * @param string $paige_access_token
      */
-    public function setPaigeAccessToken($paige_access_token): void;
+    public function setPaigeAccessToken(string $paige_access_token): void;
 
     /**
      * @return mixed
@@ -44,9 +44,9 @@ interface BotInterface extends ResourceInterface
     public function getPaigeAccessToken();
 
     /**
-     * @param $page_image_url
+     * @param string $page_image_url
      */
-    public function setPageImageUrl($page_image_url): void;
+    public function setPageImageUrl(string $page_image_url): void;
 
     /**
      * @return mixed
@@ -54,9 +54,9 @@ interface BotInterface extends ResourceInterface
     public function getPageImageUrl();
 
     /**
-     * @param $disabled
+     * @param string $disabled
      */
-    public function setDisabled($disabled): void;
+    public function setDisabled(string $disabled): void;
 
     /**
      * @return mixed
@@ -64,9 +64,9 @@ interface BotInterface extends ResourceInterface
     public function getDisabled();
 
     /**
-     * @param $channel_type
+     * @param string $channel_type
      */
-    public function setChannelType($channel_type): void;
+    public function setChannelType(string $channel_type): void;
 
     /**
      * @return mixed
@@ -74,9 +74,9 @@ interface BotInterface extends ResourceInterface
     public function getChannelType();
 
     /**
-     * @param $timezone
+     * @param string $timezone
      */
-    public function setTimezone($timezone): void;
+    public function setTimezone(string $timezone): void;
 
     /**
      * @return mixed
