@@ -1,6 +1,9 @@
 # Define your own admin routes here
-ahmedkhd_sylius_bot_plugin_admin_bots_messenger:
-  path: /bots/messenger
-  defaults:
-    _controller: ahmedkhd_sylius_bot_plugin.controller.bots:connectMessageAction
-    name: ~
+ahmedkhd_bot:
+  resource: |
+    alias: sylius_bot_plugin.bot
+    except: ['show']
+    section: admin
+    templates: "@SyliusAdmin\\Crud"
+    grid: sylius_bot_plugin
+  type: sylius.resource

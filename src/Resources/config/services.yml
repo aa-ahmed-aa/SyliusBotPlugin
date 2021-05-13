@@ -1,11 +1,5 @@
 
 services:
-  ahmedkhd_sylius_bot_plugin.controller.bots:
-    class: Ahmedkhd\SyliusBotPlugin\Controller\GreetingController
-    autowire: true
-    public: true
-    autoconfigure: true
-
   ahmedkhd_sylius_bot_plugin.listener.admin.menu_builder:
     class: Ahmedkhd\SyliusBotPlugin\Menu\MenuBuilderListener
     tags:

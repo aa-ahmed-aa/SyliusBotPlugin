@@ -1,0 +1,36 @@
+sylius_grid:
+  grids:
+    sylius_bot_plugin:
+      driver:
+        options:
+          class: "%sylius_bot_plugin.model.bot.class%"
+      fields:
+        page_name:
+          label: sylius_bot_plugin.bot.page_name
+          type: string
+        page_id:
+          label: sylius_bot_plugin.bot.page_id
+          type: string
+        timezone:
+          label: sylius_bot_plugin.bot.timezone
+          type: string
+
+      actions:
+        main:
+          create:
+            type: create
+        item:
+          update:
+            type: update
+          delete:
+            type: delete
+        bulk:
+          delete:
+            type: delete
+      filters:
+        page_name:
+          type: string
+        page_id:
+          type: string
+        timezone:
+          type: string
