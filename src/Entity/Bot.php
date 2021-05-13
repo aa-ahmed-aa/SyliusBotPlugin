@@ -15,7 +15,7 @@ class Bot implements BotInterface
     use TimestampableEntity;
 
     /**
-     * @var integer
+     * @var integer | null
      * @ORM\Id
      * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -23,43 +23,43 @@ class Bot implements BotInterface
     protected $id;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="page_name", type="string", length=255, nullable=true)
      */
     protected $page_name;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
      */
     protected $paige_access_token;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="page_id", type="string", length=255, nullable=true)
      */
     protected $page_id;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="page_image_url", type="string", length=255, nullable=true)
      */
     protected $page_image_url;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="disabled", type="boolean", options={"default": false})
      */
     protected $disabled;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="channel_type", type="string", length=255, nullable=true)
      */
     protected $channel_type;
 
     /**
-     * @var string
+     * @var string | null
      * @ORM\Column(name="timezone", type="string", length=255, nullable=true)
      */
     protected $timezone;
