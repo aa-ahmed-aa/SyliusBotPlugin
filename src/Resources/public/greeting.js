@@ -1,3 +1,3 @@
 setTimeout(function () {
-    document.getElementById('greeting').innerHTML = document.getElementById('greeting').dataset.greeting;
+    alert(Math.random());
 }, 1000);

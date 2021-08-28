@@ -2,8 +2,8 @@
 ahmedkhd_bot:
   resource: |
     alias: sylius_bot_plugin.bot
-    except: ['show']
+    except: ['show', 'update', 'create']
     section: admin
-    templates: "@SyliusAdmin\\Crud"
+    templates: "@AhmedkhdSyliusBotPlugin"
     grid: sylius_bot_plugin
   type: sylius.resource

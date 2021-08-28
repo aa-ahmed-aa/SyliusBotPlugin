@@ -8,7 +8,7 @@ use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="sylisu_ahmedkhd_bot")
+ * @ORM\Table(name="ahmedkhd_sylius_bot")
  */
 class Bot implements BotInterface
 {
