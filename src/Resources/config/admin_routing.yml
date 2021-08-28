@@ -1,6 +1,9 @@
 # Define your own admin routes here
-ahmedkhd_sylius_bot_plugin_admin_bots_messenger:
-  path: /bots/messenger
-  defaults:
-    _controller: Ahmedkhd\SyliusBotPlugin\Controller\GreetingController::staticallyGreetAction
-    name: ~
+ahmedkhd_bot:
+  resource: |
+    alias: sylius_bot_plugin.bot
+    except: ['show', 'update', 'create']
+    section: admin
+    templates: "@AhmedkhdSyliusBotPlugin"
+    grid: sylius_bot_plugin
+  type: sylius.resource

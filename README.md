@@ -115,8 +115,11 @@ To be able to setup a plugin's database, remember to configure you database cred
 ```bash 
 $ composer require aa-ahmed-aa/SyliusBotPlugin
 ```
-apeend to `config/bundle.php` 
-```php
-Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
-```
 
+2- Add the following import to _`sylius.yaml`:
+```php
+imports:
+    # ...
+    - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/app/config.yml' }
+
+```

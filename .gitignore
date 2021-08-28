@@ -12,4 +12,5 @@
 /phpspec.yml
 /phpunit.xml
 /.idea
+/tests/Application/public/build
 /package-lock.json

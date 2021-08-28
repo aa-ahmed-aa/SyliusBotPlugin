@@ -1,0 +1,5 @@
+sylius_resource:
+  resources:
+    sylius_bot_plugin.bot:
+      classes:
+        model: Ahmedkhd\SyliusBotPlugin\Entity\Bot
