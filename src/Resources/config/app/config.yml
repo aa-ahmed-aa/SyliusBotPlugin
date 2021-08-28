@@ -1,0 +1,4 @@
+imports:
+  - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/services.yml' }
+  - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/packages/sylius_resource.yml' }
+  - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/packages/grid.yml' }
