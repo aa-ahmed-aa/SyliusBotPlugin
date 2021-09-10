@@ -14,4 +14,3 @@
 /.idea
 /tests/Application/public/build
 /package-lock.json
-/tests/Application/.env
