@@ -1,9 +1,2 @@
-ahmedkhd_sylius_bot_shop:
-    resource: "@AhmedkhdSyliusBotPlugin/Resources/config/shop_routing.yml"
-    prefix: /{_locale}
-    requirements:
-        _locale: ^[a-z]{2}(?:_[A-Z]{2})?$
-
-ahmedkhd_sylius_bot_admin:
-    resource: "@AhmedkhdSyliusBotPlugin/Resources/config/admin_routing.yml"
-    prefix: /admin
+ahmedkhd_sylius_bot:
+    resource: "@AhmedkhdSyliusBotPlugin/Resources/config/routes.yml"

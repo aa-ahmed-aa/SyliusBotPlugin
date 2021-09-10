@@ -112,14 +112,21 @@ To be able to setup a plugin's database, remember to configure you database cred
     ```
 
 ## install this package to sylius application 
+- Install using composer 
 ```bash 
 $ composer require aa-ahmed-aa/SyliusBotPlugin
 ```
 
-2- Add the following import to _`sylius.yaml`:
-```php
+- Add the following import to _`sylius.yaml`:
+```yml
 imports:
     # ...
     - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/app/config.yml' }
 
+```
+
+- Import routes inside your routes.yml
+```yml
+ahmedkhd_sylius_bot:
+    resource: "@AhmedkhdSyliusBotPlugin/Resources/config/routes.yml"
 ```
