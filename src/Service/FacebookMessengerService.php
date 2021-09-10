@@ -7,9 +7,12 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
+use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\FacebookDriver;
+use Sylius\Component\Resource\Model\ResourceInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -18,12 +21,19 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class FacebookMessengerService extends BotService
 {
-    public function __construct($container)
+    /**
+     * FacebookMessengerService constructor.
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
     }
 
-    public function flow()
+    /**
+     * The Bot flow conversation
+     */
+    public function flow(): void
     {
         //create menu
         $this->updatePresistentMenu();
@@ -32,6 +42,7 @@ class FacebookMessengerService extends BotService
 
         $botman = BotManFactory::create($this->getConfiguration());
 
+        /** @phpstan-ignore-next-line */
         $botman->fallback("Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@fallbackMessage");
         $botman->hears('list_items', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@listProducts");
         $botman->hears('remove_from_cart {id}', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@removeFromCart");
@@ -42,11 +53,11 @@ class FacebookMessengerService extends BotService
     }
 
     /**
-     * @param $items
+     * @param ResourceInterface $items
      * @param bool $forCart
-     * @return array
+     * @return mixed|ResourceInterface
      */
-    public function wrapProducts($items, $forCart = false)
+    public function wrapProducts(ResourceInterface $items, $forCart = false)
     {
         return $items;
     }
@@ -54,41 +65,62 @@ class FacebookMessengerService extends BotService
     /**
      * @param BotMan $bot
      */
-    public function fallbackMessage(BotMan $bot)
+    public function fallbackMessage(BotMan $bot): void
     {
-        $bot->reply(ButtonTemplate::create('Sorry ' . $bot->getUser()->getFirstName() .' i can\'t understand you💅')
+        $baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
+        /**
+         * @phpstan-ignore-next-line
+         * @psalm-suppress InvalidArgument
+         */
+        $bot->reply(ButtonTemplate::create("Sorry {$bot->getUser()->getFirstName()} i can't understand you💅")
             ->addButton(ElementButton::create('List Products')
                 ->type('postback')
                 ->payload('list_items')
             )
             ->addButton(ElementButton::create('Go to the website')
-                ->url(getenv('APP_URL'))
+                ->url($baseUrl)
             )
         );
     }
 
-    public function listProducts(BotMan $bot)
+    /**
+     * @param BotMan $bot
+     */
+    public function listProducts(BotMan $bot): void
     {
         $bot->reply('i will list items for you my love');
     }
 
-    public function removeFromCart(BotMan $bot)
+    /**
+     * @param BotMan $bot
+     * @param string $id
+     */
+    public function removeFromCart(BotMan $bot, string $id): void
     {
         $bot->reply("i will removed item with id {$id} from your Cart");
     }
 
-    public function addToCart(BotMan $bot,string $id)
+    /**
+     * @param BotMan $bot
+     * @param string $id
+     */
+    public function addToCart(BotMan $bot,string $id): void
     {
         $bot->reply("i will add item with id {$id} to your Cart");
     }
 
-    public function listItemsInCart(BotMan $bot)
+    /**
+     * @param BotMan $bot
+     */
+    public function listItemsInCart(BotMan $bot): void
     {
         $bot->reply("i will list items in your cart: {$bot->getUser()->getFirstName()}");
     }
 
-
-    public function getConfiguration()
+    /**
+     * @return array
+     */
+    public function getConfiguration(): array
     {
         return [
             'facebook' => [
@@ -99,7 +131,10 @@ class FacebookMessengerService extends BotService
         ];
     }
 
-    public function updatePresistentMenu()
+    /**
+     * @return Response
+     */
+    public function updatePresistentMenu(): Response
     {
         $access_token = getenv('FACEBOOK_APP_TOKEN');
         $curlRequest = <<<EOF

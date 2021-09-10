@@ -3,18 +3,26 @@
 
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
+use Sylius\Component\Resource\Model\ResourceInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 abstract class BotService extends AbstractService implements BotServiceInterface
 {
-    public function __construct($container)
+    /**
+     * BotService constructor.
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
     }
 
     /**
-     * @inheritDoc
+     * @param ResourceInterface $items
+     * @param bool $forCart
+     * @return mixed|ResourceInterface
      */
-    public function wrapProducts($items, $forCart = false)
+    public function wrapProducts(ResourceInterface $items, bool $forCart = false)
     {
         return $items;
     }

@@ -39,20 +39,27 @@ final class WebhookController extends AbstractController
         $this->facebookMessengerService = $facebookMessengerService;
     }
 
-    public function messengerWebhookVerification(Request $request)
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function messengerWebhookVerification(Request $request): Response
     {
         $token = $request->query->get("hub_verify_token");
         $challenge = $request->query->get("hub_challenge");
         $mode = $request->query->get("hub_mode");
 
         if(getenv('FACEBOOK_VERIFICATION') === $token) {
-            return new Response($challenge, 200);
+            return new Response((string)$challenge, 200);
         }
 
         return new Response("Token Didn't match ", 404);
     }
 
-    public function messengerWebhook()
+    /**
+     * @return Response
+     */
+    public function messengerWebhook(): Response
     {
         $this->facebookMessengerService->flow();
 
