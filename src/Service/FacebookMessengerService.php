@@ -7,7 +7,6 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
-use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\FacebookDriver;
@@ -22,12 +21,21 @@ use Symfony\Component\HttpFoundation\Response;
 class FacebookMessengerService extends BotService
 {
     /**
+     * @var string
+     */
+    protected $baseUrl;
+
+    /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
+        /**
+         * @psalm-suppress PossiblyFalsePropertyAssignmentValue
+         */
+        $this->baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
     }
 
     /**
@@ -39,15 +47,13 @@ class FacebookMessengerService extends BotService
         $this->updatePresistentMenu();
 
         DriverManager::loadDriver(FacebookDriver::class);
-
         $botman = BotManFactory::create($this->getConfiguration());
 
-        /** @phpstan-ignore-next-line */
-        $botman->fallback("Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@fallbackMessage");
-        $botman->hears('list_items', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@listProducts");
-        $botman->hears('remove_from_cart {id}', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@removeFromCart");
-        $botman->hears('add_to_cart {id}', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@addToCart");
-        $botman->hears('mycart', "Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService@listItemsInCart");
+        $botman = $this->fallbackMessage($botman);
+        $botman = $this->listProducts($botman);
+        $botman = $this->removeFromCart($botman);
+        $botman = $this->addToCart($botman);
+        $botman = $this->listItemsInCart($botman);
 
         $botman->listen();
     }
@@ -63,58 +69,75 @@ class FacebookMessengerService extends BotService
     }
 
     /**
-     * @param BotMan $bot
+     * @param BotMan $botman
+     * @return BotMan
      */
-    public function fallbackMessage(BotMan $bot): void
+    public function fallbackMessage(Botman $botman): BotMan
     {
-        $baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
-        /**
-         * @phpstan-ignore-next-line
-         * @psalm-suppress InvalidArgument
-         */
-        $bot->reply(ButtonTemplate::create("Sorry {$bot->getUser()->getFirstName()} i can't understand you💅")
-            ->addButton(ElementButton::create('List Products')
-                ->type('postback')
-                ->payload('list_items')
-            )
-            ->addButton(ElementButton::create('Go to the website')
-                ->url($baseUrl)
-            )
-        );
+        $botman->fallback(function (BotMan $botman): void {
+            /**
+             * @phpstan-ignore-next-line
+             * @psalm-suppress InvalidArgument
+             */
+            $botman->reply(ButtonTemplate::create("Sorry {$botman->getUser()->getFirstName()} i can't understand you💅")
+                ->addButton(ElementButton::create('List Products')
+                    ->type('postback')
+                    ->payload('list_items')
+                )
+                ->addButton(ElementButton::create('Go to the website')
+                    ->url($this->baseUrl)
+                )
+            );
+        });
+        return $botman;
     }
 
     /**
-     * @param BotMan $bot
+     * @param BotMan $botman
+     * @return BotMan
      */
-    public function listProducts(BotMan $bot): void
+    public function listProducts(Botman $botman): BotMan
     {
-        $bot->reply('i will list items for you my love');
+        $botman->hears("list_items", function (BotMan $botman): void {
+            $botman->reply('i will list items for you my love');
+        });
+        return $botman;
     }
 
     /**
-     * @param BotMan $bot
-     * @param string $id
+     * @param BotMan $botman
+     * @return BotMan
      */
-    public function removeFromCart(BotMan $bot, string $id): void
+    public function removeFromCart(Botman $botman): BotMan
     {
-        $bot->reply("i will removed item with id {$id} from your Cart");
+        $botman->hears('remove_item_from_cart', function(BotMan $botman, string $id): void {
+            $botman->reply("i will removed item with id {$id} from your Cart");
+        });
+        return $botman;
     }
 
     /**
-     * @param BotMan $bot
-     * @param string $id
+     * @param BotMan $botman
+     * @return BotMan
      */
-    public function addToCart(BotMan $bot,string $id): void
+    public function addToCart(Botman $botman): BotMan
     {
-        $bot->reply("i will add item with id {$id} to your Cart");
+        $botman->hears('add_to_cart', function(BotMan $botman, string $id): void {
+            $botman->reply("i will add item with id {$id} to your Cart");
+        });
+        return $botman;
     }
 
     /**
-     * @param BotMan $bot
+     * @param BotMan $botman
+     * @return BotMan
      */
-    public function listItemsInCart(BotMan $bot): void
+    public function listItemsInCart(Botman $botman): BotMan
     {
-        $bot->reply("i will list items in your cart: {$bot->getUser()->getFirstName()}");
+        $botman->hears('mycart', function(BotMan $botman): void {
+            $botman->reply("i will list items in your cart: {$botman->getUser()->getFirstName()}");
+        });
+        return $botman;
     }
 
     /**
@@ -155,7 +178,7 @@ class FacebookMessengerService extends BotService
                 {
                   "type":"web_url",
                   "title":"Visit my Website",
-                  "url":"http://enigmatic-mesa-24739.herokuapp.com"
+                  "url":"{$this->baseUrl}"
                 }
               ]
             }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token={$access_token}"
