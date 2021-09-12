@@ -9,8 +9,10 @@ use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
+use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
 use BotMan\Drivers\Facebook\FacebookDriver;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Pagerfanta\Pagerfanta;
+use Sylius\Component\Core\Model\ChannelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -26,6 +28,16 @@ class FacebookMessengerService extends BotService
     protected $baseUrl;
 
     /**
+     * @var string
+     */
+    protected $defaultLocaleCode;
+
+    /**
+     * @var ChannelInterface
+     */
+    protected $defaultChannel;
+
+    /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
      */
@@ -36,6 +48,8 @@ class FacebookMessengerService extends BotService
          * @psalm-suppress PossiblyFalsePropertyAssignmentValue
          */
         $this->baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
+        $this->defaultLocaleCode = $this->container->get('sylius.context.locale')->getLocaleCode();
+        $this->defaultChannel = $this->container->get('sylius.context.channel')->getChannel();
     }
 
     /**
@@ -56,16 +70,6 @@ class FacebookMessengerService extends BotService
         $botman = $this->listItemsInCart($botman);
 
         $botman->listen();
-    }
-
-    /**
-     * @param ResourceInterface $items
-     * @param bool $forCart
-     * @return mixed|ResourceInterface
-     */
-    public function wrapProducts(ResourceInterface $items, $forCart = false)
-    {
-        return $items;
     }
 
     /**
@@ -98,8 +102,14 @@ class FacebookMessengerService extends BotService
      */
     public function listProducts(Botman $botman): BotMan
     {
-        $botman->hears("list_items", function (BotMan $botman): void {
-            $botman->reply('i will list items for you my love');
+        /** @var Pagerfanta $products */
+        $products = $this->container->get('sylius.repository.product')->createPaginator();
+
+        $botman->hears("list_items", function (BotMan $botman) use ($products): void {
+            $elements = $this->wrapProducts($products->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel);
+            $botman->reply(GenericTemplate::create()
+                ->addImageAspectRatio(GenericTemplate::RATIO_SQUARE)
+                ->addElements($elements ?? []));
         });
         return $botman;
     }
@@ -122,8 +132,8 @@ class FacebookMessengerService extends BotService
      */
     public function addToCart(Botman $botman): BotMan
     {
-        $botman->hears('add_to_cart', function(BotMan $botman, string $id): void {
-            $botman->reply("i will add item with id {$id} to your Cart");
+        $botman->hears('add_to_cart', function(BotMan $botman): void {
+            $botman->reply("i will add item with id to your Cart");
         });
         return $botman;
     }

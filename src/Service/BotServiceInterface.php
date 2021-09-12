@@ -4,14 +4,16 @@
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
+use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 
 interface BotServiceInterface
 {
     /**
-     * @param ResourceInterface $items
-     * @param bool $forCart
-     * @return mixed
+     * @param iterable $products
+     * @param string $localeCode
+     * @param ChannelInterface $channel
+     * @return array
      */
-    public function wrapProducts(ResourceInterface $items, bool $forCart = false);
+    public function wrapProducts(iterable $products,string $localeCode, ChannelInterface $channel): array;
 }
