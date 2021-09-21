@@ -30,6 +30,8 @@ abstract class BotService extends AbstractService implements BotServiceInterface
     public function wrapProducts(iterable $products,string $localeCode, ChannelInterface $channel): array
     {
         $elements = [];
+        $imagineCacheManager = $this->container->get('liip_imagine.cache.manager');
+
         /** @var Product $product */
         foreach ($products as $product) {
             $buttons = [];
@@ -42,9 +44,18 @@ abstract class BotService extends AbstractService implements BotServiceInterface
             $buttons[] = ElementButton::create('View On Website')
                 ->url("{$this->baseUrl}/{$localeCode}/products/{$product->getSlug()}");
 
+            $imageUrl = "https://via.placeholder.com/200x200";
+
+             if (!empty($product->getImagesByType('thumbnail')->first())) {
+                 $imageUrl = $imagineCacheManager->getBrowserPath($product->getImagesByType('thumbnail')->first()->getPath(), 'sylius_shop_product_thumbnail');
+             } else if($product->getImages()->first()) {
+                 $imageUrl = $imagineCacheManager->getBrowserPath($product->getImages()->first()->getPath(), 'sylius_shop_product_thumbnail');
+             }
+
             $elements[] = Element::create($product->getName())
                 ->subtitle($product->getShortDescription())
-                ->image("{$this->baseUrl}/media/cache/sylius_shop_product_large_thumbnail/{$product->getImages()->first()->getPath()}")
+                ->image($imageUrl)
+//                ->image("{$this->baseUrl}/media/cache/sylius_shop_product_large_thumbnail/{$product->getImages()->first()->getPath()}")
                 ->addButtons($buttons);
         }
 
