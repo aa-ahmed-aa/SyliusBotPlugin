@@ -11,7 +11,9 @@ use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
 use BotMan\Drivers\Facebook\FacebookDriver;
+use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
+use Psr\Log\LoggerInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,13 +39,18 @@ class FacebookMessengerService extends BotService
      */
     protected $defaultChannel;
 
+    /** @var SerializerInterface */
+    protected $serializer;
+
     /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
+     * @param LoggerInterface $logger
+     * @param SerializerInterface $serializer
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
     {
-        parent::__construct($container);
+        parent::__construct($container, $logger, $serializer);
         /**
          * @psalm-suppress PossiblyFalsePropertyAssignmentValue
          */
@@ -132,8 +139,9 @@ class FacebookMessengerService extends BotService
      */
     public function addToCart(Botman $botman): BotMan
     {
-        $botman->hears('add_to_cart', function(BotMan $botman): void {
-            $botman->reply("i will add item with id to your Cart");
+        $botman->hears('add_to_cart_{productId}', function(BotMan $botman, $productId): void {
+
+            $botman->reply("i will add item with id: {$productId} to your Cart");
         });
         return $botman;
     }
@@ -177,7 +185,7 @@ class FacebookMessengerService extends BotService
               "call_to_actions":[
                 {
                   "type":"postback",
-                  "title":"List Items",
+                  "title":"List Products",
                   "payload":"list_items"
                 },
                 {

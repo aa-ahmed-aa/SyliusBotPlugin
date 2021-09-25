@@ -18,3 +18,5 @@ services:
     public: true
     arguments:
       - '@service_container'
+      - '@logger'
+      - '@serializer'
