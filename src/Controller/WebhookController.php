@@ -58,11 +58,12 @@ final class WebhookController extends AbstractController
     }
 
     /**
+     * @param Request $request
      * @return Response
      */
-    public function messengerWebhook(): Response
+    public function messengerWebhook(Request $request): Response
     {
-        $this->facebookMessengerService->flow();
+        $this->facebookMessengerService->flow($request);
 
         // Start listening
         return new Response("Done");

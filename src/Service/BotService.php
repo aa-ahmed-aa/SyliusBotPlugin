@@ -14,10 +14,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 abstract class BotService extends AbstractService implements BotServiceInterface
 {
     /** @var LoggerInterface */
-    private $logger;
+    protected $logger;
 
     /** @var SerializerInterface */
-    private $serializer;
+    protected $serializer;
 
     /**
      * BotService constructor.
@@ -48,7 +48,10 @@ abstract class BotService extends AbstractService implements BotServiceInterface
             $buttons = [];
             if($product->isSimple()) {
                 $buttons[] = ElementButton::create("Add to cart (" . $product->getVariants()->first()->getChannelPricingForChannel($channel)->getPrice() / 100 . " {$channel->getBaseCurrency()->getCode()})")
-                    ->payload('add_to_cart_'.$product->getId())
+                    ->payload(json_encode([
+                        "type" => "add_to_cart",
+                        "product_id" => $product->getId()
+                    ]))
                     ->type('postback');
             }
 
