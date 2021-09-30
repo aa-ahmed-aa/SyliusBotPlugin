@@ -36,9 +36,10 @@ abstract class BotService extends AbstractService implements BotServiceInterface
      * @param iterable $products
      * @param string $localeCode
      * @param ChannelInterface $channel
+     * @param int $pageNo
      * @return array
      */
-    public function wrapProducts(iterable $products,string $localeCode, ChannelInterface $channel): array
+    public function wrapProducts(iterable $products,string $localeCode, ChannelInterface $channel, $pageNo = 1): array
     {
         $elements = [];
         $imagineCacheManager = $this->container->get('liip_imagine.cache.manager');
@@ -48,7 +49,7 @@ abstract class BotService extends AbstractService implements BotServiceInterface
             $buttons = [];
             if($product->isSimple()) {
                 $buttons[] = ElementButton::create("Add to cart (" . $product->getVariants()->first()->getChannelPricingForChannel($channel)->getPrice() / 100 . " {$channel->getBaseCurrency()->getCode()})")
-                    ->payload(json_encode([
+                    ->payload(\GuzzleHttp\json_encode([
                         "type" => "add_to_cart",
                         "product_id" => $product->getId()
                     ]))
@@ -70,6 +71,17 @@ abstract class BotService extends AbstractService implements BotServiceInterface
                 ->subtitle($product->getShortDescription())
                 ->image($imageUrl)
                 ->addButtons($buttons);
+        }
+
+        if(!(count($products) < 9)) {
+            $elements[] = Element::create('See More')
+                ->image("https://lh3.googleusercontent.com/proxy/cB591pnLcpW46IF3POBCNArr0QiPt2g3Ze1ixsLn10WQBhIu0zOU1ysswIqxg-ScytqHDsXlw0GaGuNBX9P8o-xsUDVs9uc")
+                ->addButton(ElementButton::create('See More')
+                    ->type('postback')
+                    ->payload(\GuzzleHttp\json_encode([
+                        "type" => "list_items",
+                        "page" => $pageNo + 1
+                    ])));
         }
 
         return $elements;

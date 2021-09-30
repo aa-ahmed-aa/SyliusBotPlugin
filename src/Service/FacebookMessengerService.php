@@ -7,9 +7,12 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 use BotMan\BotMan\BotMan;
 use BotMan\BotMan\BotManFactory;
 use BotMan\BotMan\Drivers\DriverManager;
+use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
+use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
+use BotMan\Drivers\Facebook\Extensions\QuickReplyButton;
 use BotMan\Drivers\Facebook\FacebookDriver;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
@@ -48,6 +51,7 @@ class FacebookMessengerService extends BotService
 
     protected $httpClient;
 
+
     /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
@@ -76,85 +80,81 @@ class FacebookMessengerService extends BotService
         //create menu
         $this->updatePresistentMenu();
 
-        DriverManager::loadDriver(FacebookDriver::class);
-        $botman = BotManFactory::create($this->getConfiguration());
-
-//        $botman = $this->fallbackMessage($botman);
-        $botman = $this->listProducts($botman);
-        $botman = $this->removeFromCart($botman);
-        $botman = $this->addToCart($botman);
-        $botman = $this->listItemsInCart($botman);
-
-        $botman->listen();
+        $this->listProducts();
+        $this->removeFromCart();
+        $this->addToCart();
+        $this->listItemsInCart();
     }
 
     /**
-     * @param BotMan $botman
-     * @return BotMan
+     * Send Fallback message
      */
-    public function fallbackMessage(Botman $botman): BotMan
+    public function fallbackMessage()
     {
-        $botman->fallback(function (BotMan $botman): void {
-            /**
-             * @phpstan-ignore-next-line
-             * @psalm-suppress InvalidArgument
-             */
-            $botman->reply(ButtonTemplate::create("Sorry {$botman->getUser()->getFirstName()} i can't understand you💅")
-                ->addButton(ElementButton::create('List Products')
-                    ->type('postback')
-                    ->payload('list_items')
-                )
-                ->addButton(ElementButton::create('Go to the website')
-                    ->url($this->baseUrl)
-                )
+        $this->sendMessage(ButtonTemplate::create("Sorry i can't understand you💅")
+            ->addButton(ElementButton::create('List Products')
+                ->type('postback')
+                ->payload(\GuzzleHttp\json_encode([
+                    "type" => "list_items",
+                    "page" => 1
+                ]))
+            )
+            ->addButton(ElementButton::create('Go to the website')
+                ->url($this->baseUrl)
+            ));
+    }
+
+    /**
+     * List products
+     */
+    public function listProducts()
+    {
+        $payload = $this->getPayload("list_items");
+        if(!empty($payload)) {
+            $this->logger->critical(\GuzzleHttp\json_encode($payload));
+            /** @var Pagerfanta $productsPaginator */
+            $productsPaginator = $this->container->get('sylius.repository.product')->createPaginator();
+            $productsPaginator->setCurrentPage($payload['page']);
+            $productsPaginator->setMaxPerPage(9);
+
+            $elements = $this->wrapProducts($productsPaginator->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel, $payload['page']);
+
+            $this->sendMessage(
+                GenericTemplate::create()
+                    ->addImageAspectRatio(GenericTemplate::RATIO_SQUARE)
+                    ->addElements($elements ?? [])
+                    ->addQuickReply(
+                        QuickReplyButton::create("My Cart")
+                            ->type('text')
+                            ->payload(\GuzzleHttp\json_encode(["type" => "mycart"]))
+                            ->imageUrl('https://i.pinimg.com/originals/15/4f/df/154fdf2f2759676a96e9aed653082276.png')
+                    )
             );
-        });
-        return $botman;
+        }
     }
 
     /**
-     * @param BotMan $botman
-     * @return BotMan
+     * Remove item from cart
      */
-    public function listProducts(Botman $botman): BotMan
+    public function removeFromCart()
     {
-        /** @var Pagerfanta $products */
-        $products = $this->container->get('sylius.repository.product')->createPaginator();
-
-        $botman->hears("list_items", function (BotMan $botman) use ($products): void {
-            $elements = $this->wrapProducts($products->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel);
-            $botman->reply(GenericTemplate::create()
-                ->addImageAspectRatio(GenericTemplate::RATIO_SQUARE)
-                ->addElements($elements ?? []));
-        });
-        return $botman;
+        $payload = $this->getPayload("remove_item_from_cart");
+        if(!empty($payload)) {
+            $product_id = $payload["product_id"];
+            $this->sendMessage(["text" => "product with id {$product_id} will be remove from your cart"]);
+        }
     }
 
     /**
-     * @param BotMan $botman
-     * @return BotMan
+     * Add item to cart
      */
-    public function removeFromCart(Botman $botman): BotMan
-    {
-        $botman->hears('remove_item_from_cart', function(BotMan $botman, string $id): void {
-            $botman->reply("i will removed item with id {$id} from your Cart");
-        });
-        return $botman;
-    }
-
-    /**
-     * @param BotMan $botman
-     * @return BotMan
-     */
-    public function addToCart(Botman $botman): BotMan
+    public function addToCart()
     {
         $payload = $this->getPayload("add_to_cart");
         if(!empty($payload)) {
             $product_id = $payload["product_id"];
-            $this->sendNormalMessage("product with id {$product_id} will be added to your cart");
+            $this->sendMessage(["text" => "product with id {$product_id} will be added to your cart"]);
         }
-
-        return $botman;
     }
 
     /**
@@ -163,17 +163,17 @@ class FacebookMessengerService extends BotService
      */
     public function getPayload(string $type)
     {
-        $entry = $this->request->get('entry');
+        $entry = $this->array_flatten($this->request->get('entry'));
 
-        if(!empty($entry) &&
-            isset($entry[0]) &&
-            isset($entry[0]['messaging']) &&
-            isset($entry[0]['messaging'][0]) &&
-            isset($entry[0]['messaging'][0]["postback"]) &&
-            isset($entry[0]['messaging'][0]["postback"]["payload"])  &&
-            $this->isJson($entry[0]['messaging'][0]["postback"]["payload"])
-        ) {
-            $payload = \GuzzleHttp\json_decode($entry[0]['messaging'][0]["postback"]["payload"], true);
+        if(!key_exists('payload', $entry)) {
+            $this->fallbackMessage();
+            return false;
+        }
+
+        $payload = $entry["payload"];
+
+        if($payload && $this->isJson($payload)) {
+            $payload = \GuzzleHttp\json_decode($payload, true);
 
             if(
                 is_array($payload) &&
@@ -186,6 +186,24 @@ class FacebookMessengerService extends BotService
         return false;
     }
 
+    /*
+     * convert array multidimensional array to flat array
+     */
+    function array_flatten($array) {
+        if (!is_array($array)) {
+            return false;
+        }
+        $result = array();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $result = array_merge($result, $this->array_flatten($value));
+            } else {
+                $result = array_merge($result, array($key => $value));
+            }
+        }
+        return $result;
+    }
+
     /**
      * @param $string
      * @return bool
@@ -196,15 +214,13 @@ class FacebookMessengerService extends BotService
     }
 
     /**
-     * @param BotMan $botman
-     * @return BotMan
+     * List items in cart
      */
-    public function listItemsInCart(Botman $botman): BotMan
+    public function listItemsInCart()
     {
-        $botman->hears('mycart', function(BotMan $botman): void {
-            $botman->reply("i will list items in your cart: {$botman->getUser()->getFirstName()}");
-        });
-        return $botman;
+        if(!empty($this->getPayload("mycart"))) {
+            $this->sendMessage(["text" => "i will list items in your cart"]);
+        }
     }
 
     /**
@@ -233,12 +249,17 @@ class FacebookMessengerService extends BotService
                 [
                     "type" => "postback",
                     "title" => "List Products",
-                    "payload" => "list_items"
+                    "payload" => \GuzzleHttp\json_encode([
+                        "type" => "list_items",
+                        "page" => 1
+                    ])
                 ],
                 [
                     "type" => "postback",
                     "title" => "My Cart",
-                    "payload" => "mycart"
+                    "payload" => \GuzzleHttp\json_encode([
+                        "type" => "mycart"
+                    ])
                 ],
                 [
                     "type" => "web_url",
@@ -253,22 +274,24 @@ class FacebookMessengerService extends BotService
             Request::METHOD_POST
         );
 
-        return new Response($response->getBody());
+        return new Response("Done");
     }
 
-    public function sendNormalMessage(string $text)
+    /**
+     * @param string|array|OutgoingMessage|Question $message
+     * @return ResponseInterface|null
+     */
+    public function sendMessage($message)
     {
         $body = [
             "messaging_type" => "RESPONSE",
             "recipient" => [
                 "id" => $this->request->get('entry')[0]['messaging'][0]["sender"]["id"]
             ],
-              "message" => [
-                  "text" => $text
-              ]
+            "message" => $message
         ];
 
-        $response = $this->sendFacebookRequest(
+        return $this->sendFacebookRequest(
             "/" . getenv('FACEBOOK_GRAPH_VERSION') . "/me/messages?access_token=" . getenv('FACEBOOK_PAGE_ACCESS_TOKEN'),
             $body,
             Request::METHOD_POST
