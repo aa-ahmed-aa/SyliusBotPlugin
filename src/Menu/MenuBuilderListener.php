@@ -20,5 +20,9 @@ final class MenuBuilderListener
             ->setLabel('Messenger')
             ->setLabelAttribute('icon', 'facebook')
         ;
+        $bots->addChild('bot_users', ['route' => 'sylius_bot_plugin_admin_bot_subscriber_index'])
+            ->setLabel('sylius_bot_plugin.bot_subscriber.users')
+            ->setLabelAttribute('icon', 'podcast')
+        ;
     }
 }

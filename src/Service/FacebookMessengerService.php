@@ -4,19 +4,17 @@
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
-use BotMan\BotMan\BotMan;
-use BotMan\BotMan\BotManFactory;
-use BotMan\BotMan\Drivers\DriverManager;
+use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
 use BotMan\Drivers\Facebook\Extensions\QuickReplyButton;
-use BotMan\Drivers\Facebook\FacebookDriver;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Cache\Adapter\RedisAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
@@ -32,23 +30,21 @@ use GuzzleHttp\Client;
  */
 class FacebookMessengerService extends BotService
 {
+    public $channelName = "messenger";
+
+    /** @var Request */
     private $request;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $baseUrl;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     protected $defaultLocaleCode;
 
-    /**
-     * @var ChannelInterface
-     */
+    /** @var ChannelInterface */
     protected $defaultChannel;
 
+    /** @var Client */
     protected $httpClient;
 
 
@@ -57,6 +53,7 @@ class FacebookMessengerService extends BotService
      * @param ContainerInterface $container
      * @param LoggerInterface $logger
      * @param SerializerInterface $serializer
+     * @param RedisAdapter $redisAdapter
      */
     public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
     {
@@ -76,6 +73,7 @@ class FacebookMessengerService extends BotService
     public function flow($request = null): void
     {
         $this->request = $request;
+        $user = $this->getSubscriber();
 
         //create menu
         $this->updatePresistentMenu();
@@ -111,7 +109,6 @@ class FacebookMessengerService extends BotService
     {
         $payload = $this->getPayload("list_items");
         if(!empty($payload)) {
-            $this->logger->critical(\GuzzleHttp\json_encode($payload));
             /** @var Pagerfanta $productsPaginator */
             $productsPaginator = $this->container->get('sylius.repository.product')->createPaginator();
             $productsPaginator->setCurrentPage($payload['page']);
@@ -163,11 +160,11 @@ class FacebookMessengerService extends BotService
      */
     public function getPayload(string $type)
     {
-        $entry = $this->array_flatten($this->request->get('entry'));
+        $entry = $this->arrayFlatten($this->request->get('entry'));
 
         if(!key_exists('payload', $entry)) {
             $this->fallbackMessage();
-            return false;
+            exit;
         }
 
         $payload = $entry["payload"];
@@ -186,17 +183,19 @@ class FacebookMessengerService extends BotService
         return false;
     }
 
-    /*
-     * convert array multidimensional array to flat array
+    /**
+     * Convert array multidimensional array to flat array
+     * @param $array
+     * @return array|bool
      */
-    function array_flatten($array) {
+    function arrayFlatten($array) {
         if (!is_array($array)) {
             return false;
         }
         $result = array();
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $result = array_merge($result, $this->array_flatten($value));
+                $result = array_merge($result, $this->arrayFlatten($value));
             } else {
                 $result = array_merge($result, array($key => $value));
             }
@@ -332,5 +331,45 @@ class FacebookMessengerService extends BotService
         $options[RequestOptions::JSON] = $body;
 
         return $options;
+    }
+
+    public function getSubscriber()
+    {
+        $botSubscriberId = isset($this->request->get('entry')[0]['messaging'][0]['sender']['id']) ? $this->request->get('entry')[0]['messaging'][0]['sender']['id'] : null;
+
+        /** @var BotSubscriberInterface $botSubscriber */
+        $botSubscriber = $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->findOneBy([ 'botSubscriberId' => $botSubscriberId]);
+
+        if(empty($botSubscriber)) {
+            $fields = 'name,first_name,last_name,profile_pic,locale,timezone,gender';
+
+            $response = $this->sendFacebookRequest("/{$botSubscriberId}?fields={$fields}&access_token=".getenv('FACEBOOK_PAGE_ACCESS_TOKEN'));
+            $subscriberData = \GuzzleHttp\json_decode($response->getBody(), true);
+
+            /** @var BotSubscriberInterface $botSubscriber */
+            $botSubscriber = $this->createBotSubscriber($subscriberData);
+        }
+
+        return $botSubscriber;
+    }
+
+    public function createBotSubscriber($subscriberData)
+    {
+        /** @var BotSubscriberInterface $botSubscriber */
+        $botSubscriber = $this->container->get('sylius_bot_plugin.factory.bot_subscriber')->createNew();
+
+        $botSubscriber->setChannel($this->channelName);
+        $botSubscriber->setName($subscriberData["name"]);
+        $botSubscriber->setFirstName($subscriberData["first_name"]);
+        $botSubscriber->setLastName($subscriberData["last_name"]);
+        $botSubscriber->setProfilePicture($subscriberData["profile_pic"]);
+        $botSubscriber->setLocale($subscriberData["locale"]);
+        $botSubscriber->setTimezone($subscriberData["timezone"]);
+        $botSubscriber->setGender($subscriberData["gender"]);
+        $botSubscriber->setBotSubscriberId($subscriberData["id"]);
+
+        $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->add($botSubscriber);
+
+        return $botSubscriber;
     }
 }

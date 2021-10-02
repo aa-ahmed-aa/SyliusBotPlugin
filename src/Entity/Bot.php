@@ -32,7 +32,7 @@ class Bot implements BotInterface
      * @var string | null
      * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
      */
-    protected $paige_access_token;
+    protected $page_access_token;
 
     /**
      * @var string | null

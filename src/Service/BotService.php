@@ -75,7 +75,7 @@ abstract class BotService extends AbstractService implements BotServiceInterface
 
         if(!(count($products) < 9)) {
             $elements[] = Element::create('See More')
-                ->image("https://lh3.googleusercontent.com/proxy/cB591pnLcpW46IF3POBCNArr0QiPt2g3Ze1ixsLn10WQBhIu0zOU1ysswIqxg-ScytqHDsXlw0GaGuNBX9P8o-xsUDVs9uc")
+                ->image("http://www.first-cards.com/photo/see%20more.png")
                 ->addButton(ElementButton::create('See More')
                     ->type('postback')
                     ->payload(\GuzzleHttp\json_encode([

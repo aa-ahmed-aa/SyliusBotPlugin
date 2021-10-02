@@ -7,3 +7,12 @@ ahmedkhd_bot:
     templates: "@AhmedkhdSyliusBotPlugin"
     grid: sylius_bot_plugin
   type: sylius.resource
+
+ahmedkhd_bot_subscriber:
+  resource: |
+    alias: sylius_bot_plugin.bot_subscriber
+    except: ['create']
+    section: admin
+    templates: "@SyliusAdmin\\Crud"
+    grid: sylius_bot_subscriber
+  type: sylius.resource

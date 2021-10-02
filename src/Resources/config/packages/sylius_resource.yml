@@ -3,3 +3,6 @@ sylius_resource:
     sylius_bot_plugin.bot:
       classes:
         model: Ahmedkhd\SyliusBotPlugin\Entity\Bot
+    sylius_bot_plugin.bot_subscriber:
+      classes:
+        model: Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber
