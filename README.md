@@ -117,7 +117,7 @@ To be able to setup a plugin's database, remember to configure you database cred
 $ composer require aa-ahmed-aa/SyliusBotPlugin
 ```
 
-- Add the following import to _`sylius.yaml`:
+- Add the following import to `_sylius.yaml`:
 ```yml
 imports:
     # ...

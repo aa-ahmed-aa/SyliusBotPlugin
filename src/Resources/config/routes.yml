@@ -20,3 +20,9 @@ ahmedkhd_sylius_bot_webhook:
   methods: [POST]
   defaults:
     _controller: ahmedkhd_sylius_bot_plugin.controller.webhook:messengerWebhook
+
+ahmedkhd_sylius_bot_checkout:
+  path: /bot_checkout/{cartToken}
+  methods: [GET]
+  defaults:
+    _controller: ahmedkhd_sylius_bot_plugin.controller.webhook:botCheckout

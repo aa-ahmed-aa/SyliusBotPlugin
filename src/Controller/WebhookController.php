@@ -6,10 +6,16 @@ namespace Ahmedkhd\SyliusBotPlugin\Controller;
 
 use Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService;
 use Psr\Log\LoggerInterface;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Core\Repository\OrderRepositoryInterface;
+use Sylius\Component\Core\Storage\CartStorageInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use WebDriver\Session;
 
 final class WebhookController extends AbstractController
 {
@@ -67,5 +73,26 @@ final class WebhookController extends AbstractController
 
         // Start listening
         return new Response("Done");
+    }
+
+    /**
+     * @param OrderRepositoryInterface $orderRepository
+     * @param CartStorageInterface $cartStorage
+     * @param ChannelContextInterface $channelContext
+     * @param string $cartToken
+     * @return RedirectResponse
+     */
+    public function botCheckout(
+        OrderRepositoryInterface $orderRepository,
+        CartStorageInterface $cartStorage,
+        ChannelContextInterface $channelContext,
+        string $cartToken
+    ) {
+        /** @var OrderInterface $order */
+        $order = $orderRepository->findCartByTokenValue($cartToken);
+
+        $cartStorage->setForChannel($channelContext->getChannel(), $order);
+
+        return new RedirectResponse($this->generateUrl("sylius_shop_cart_summary"));
     }
 }

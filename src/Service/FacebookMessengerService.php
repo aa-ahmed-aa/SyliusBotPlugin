@@ -4,6 +4,7 @@
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
+use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question;
@@ -14,8 +15,15 @@ use BotMan\Drivers\Facebook\Extensions\QuickReplyButton;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Component\Cache\Adapter\RedisAdapter;
+use Sylius\Component\Core\Model\Customer;
+use Sylius\Component\Core\Model\CustomerInterface;
+use Sylius\Component\Core\Model\OrderInterface;
+use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
+use Sylius\Component\Core\TokenAssigner\UniqueIdBasedOrderTokenAssigner;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
@@ -32,6 +40,15 @@ class FacebookMessengerService extends BotService
 {
     public $channelName = "messenger";
 
+    const SUPPORTED_PAYLOAD = [
+        "checkout",
+        "empty_cart",
+        "mycart",
+        "list_items",
+        "remove_item_from_cart",
+        "add_to_cart"
+    ];
+
     /** @var Request */
     private $request;
 
@@ -47,13 +64,17 @@ class FacebookMessengerService extends BotService
     /** @var Client */
     protected $httpClient;
 
+    /** @var BotSubscriber */
+    protected $user;
+
+    /** @var OrderInterface */
+    protected $order;
 
     /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
      * @param LoggerInterface $logger
      * @param SerializerInterface $serializer
-     * @param RedisAdapter $redisAdapter
      */
     public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
     {
@@ -73,7 +94,7 @@ class FacebookMessengerService extends BotService
     public function flow($request = null): void
     {
         $this->request = $request;
-        $user = $this->getSubscriber();
+        $this->setSubscriber();
 
         //create menu
         $this->updatePresistentMenu();
@@ -81,6 +102,7 @@ class FacebookMessengerService extends BotService
         $this->listProducts();
         $this->removeFromCart();
         $this->addToCart();
+        $this->checkout();
         $this->listItemsInCart();
     }
 
@@ -111,10 +133,10 @@ class FacebookMessengerService extends BotService
         if(!empty($payload)) {
             /** @var Pagerfanta $productsPaginator */
             $productsPaginator = $this->container->get('sylius.repository.product')->createPaginator();
-            $productsPaginator->setCurrentPage($payload['page']);
+            $productsPaginator->setCurrentPage($payload['page'] ?? 1);
             $productsPaginator->setMaxPerPage(9);
 
-            $elements = $this->wrapProducts($productsPaginator->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel, $payload['page']);
+            $elements = $this->wrapProducts($productsPaginator->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel, $payload['page'] ?? 1);
 
             $this->sendMessage(
                 GenericTemplate::create()
@@ -149,9 +171,39 @@ class FacebookMessengerService extends BotService
     {
         $payload = $this->getPayload("add_to_cart");
         if(!empty($payload)) {
-            $product_id = $payload["product_id"];
-            $this->sendMessage(["text" => "product with id {$product_id} will be added to your cart"]);
+            /** @var ProductInterface $product */
+            $product = $this->container->get("sylius.repository.product")->findOneById($payload["product_id"]);
+
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $this->createOrderItem($product);
+
+            $this->container->get('sylius.order_item_quantity_modifier')->modify($orderItem, 1);
+
+            $this->order->addItem($orderItem);
+
+            $this->container->get("sylius.order_processing.order_processor")->process($this->order);
+
+            $this->container->get("sylius.repository.order")->add($this->order);
+
+            $this->sendMessage(["text" => "*{$product->getName()}* add to your cart"]);
         }
+    }
+
+    /**
+     * @param ProductInterface $product
+     * @return OrderItemInterface
+     */
+    public function createOrderItem(ProductInterface $product)
+    {
+        /** @var OrderItemInterface $orderItem */
+        $orderItem = $this->container->get("sylius.factory.order_item")->createNew();
+
+        $orderItem->setOrder($this->order);
+        $orderItem->setVariant($product->getVariants()->first());
+
+        $this->container->get("sylius.repository.order_item")->add($orderItem);
+
+        return $orderItem;
     }
 
     /**
@@ -162,12 +214,11 @@ class FacebookMessengerService extends BotService
     {
         $entry = $this->arrayFlatten($this->request->get('entry'));
 
+        $payload = $entry["payload"];
         if(!key_exists('payload', $entry)) {
             $this->fallbackMessage();
             exit;
         }
-
-        $payload = $entry["payload"];
 
         if($payload && $this->isJson($payload)) {
             $payload = \GuzzleHttp\json_decode($payload, true);
@@ -178,6 +229,9 @@ class FacebookMessengerService extends BotService
                 $payload["type"] === $type
             ) {
              return $payload;
+            } else if(!in_array($payload["type"], self::SUPPORTED_PAYLOAD)) {
+                $this->fallbackMessage();
+                exit;
             }
         }
         return false;
@@ -261,6 +315,20 @@ class FacebookMessengerService extends BotService
                     ])
                 ],
                 [
+                    "type" => "postback",
+                    "title" => "Empty Cart",
+                    "payload" => \GuzzleHttp\json_encode([
+                        "type" => "empty_cart"
+                    ])
+                ],
+                [
+                    "type" => "postback",
+                    "title" => "Checkout",
+                    "payload" => \GuzzleHttp\json_encode([
+                        "type" => "checkout"
+                    ])
+                ],
+                [
                     "type" => "web_url",
                     "title" => "Visit my Website",
                     "url" => "{$this->baseUrl}"
@@ -333,7 +401,7 @@ class FacebookMessengerService extends BotService
         return $options;
     }
 
-    public function getSubscriber()
+    public function setSubscriber()
     {
         $botSubscriberId = isset($this->request->get('entry')[0]['messaging'][0]['sender']['id']) ? $this->request->get('entry')[0]['messaging'][0]['sender']['id'] : null;
 
@@ -346,14 +414,46 @@ class FacebookMessengerService extends BotService
             $response = $this->sendFacebookRequest("/{$botSubscriberId}?fields={$fields}&access_token=".getenv('FACEBOOK_PAGE_ACCESS_TOKEN'));
             $subscriberData = \GuzzleHttp\json_decode($response->getBody(), true);
 
+            /** @var CustomerInterface $botCustomer */
+            $customer = $this->createBotCustomerAndAssignSubscriber($subscriberData);
+
             /** @var BotSubscriberInterface $botSubscriber */
-            $botSubscriber = $this->createBotSubscriber($subscriberData);
+            $botSubscriber = $this->createBotSubscriber($subscriberData, $customer);
         }
 
-        return $botSubscriber;
+        $this->user = $botSubscriber;
+        $this->setCurrentActiveOrder();
     }
 
-    public function createBotSubscriber($subscriberData)
+    public function checkout()
+    {
+        $payload = $this->getPayload("checkout");
+        if(!empty($payload)) {
+            $this->container->get("sylius.storage.cart_session")->setForChannel($this->defaultChannel, $this->order);
+
+            $checkoutUrl = $this->container->get("router")->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+
+            $this->sendMessage(
+                ButtonTemplate::create("Are you sure you want to checkout 🛒?")
+                    ->addButton(ElementButton::create("Checkout")
+                        ->url(getenv("APP_URL") . $checkoutUrl)
+                    )
+                    ->addButton(ElementButton::create("Continue shopping")
+                        ->type('postback')
+                        ->payload(\GuzzleHttp\json_encode([
+                            "type" => "list_items"
+                        ]))
+                    )
+            );
+        }
+    }
+
+    /**
+     * @param array $subscriberData
+     * @param CustomerInterface $customer
+     * @return BotSubscriberInterface
+     */
+    public function createBotSubscriber(array $subscriberData, CustomerInterface $customer)
     {
         /** @var BotSubscriberInterface $botSubscriber */
         $botSubscriber = $this->container->get('sylius_bot_plugin.factory.bot_subscriber')->createNew();
@@ -367,9 +467,64 @@ class FacebookMessengerService extends BotService
         $botSubscriber->setTimezone($subscriberData["timezone"]);
         $botSubscriber->setGender($subscriberData["gender"]);
         $botSubscriber->setBotSubscriberId($subscriberData["id"]);
+        $botSubscriber->setCustomer($customer);
 
         $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->add($botSubscriber);
 
         return $botSubscriber;
+    }
+
+    /**
+     * @param array $subscriberData
+     * @return Customer
+     */
+    public function createBotCustomerAndAssignSubscriber(array $subscriberData)
+    {
+        /** @var Customer $customer */
+        $customer = $this->container->get("sylius.factory.customer")->createNew();
+        $customer->setFirstName($subscriberData["first_name"]);
+        $customer->setLastName($subscriberData["last_name"]);
+        $customer->setGender($subscriberData["gender"] === "male" ? CustomerInterface::MALE_GENDER : ($subscriberData["gender"] === "female" ? CustomerInterface::FEMALE_GENDER : CustomerInterface::UNKNOWN_GENDER));
+        $customer->setEmail("{$subscriberData["id"]}@messenger.com");
+
+        $this->container->get("sylius.repository.customer")->add($customer);
+
+        return $customer;
+    }
+
+    private function createCart(
+        CustomerInterface $customer = null,
+        ChannelInterface $channel = null,
+        $localeCode = null
+    ) {
+        /** @var OrderInterface $order */
+        $order = $this->container->get("sylius.factory.order")->createNew();
+
+        $order->setCustomer($customer ?? $this->user->getCustomer());
+        $order->setChannel($channel ?? $this->defaultChannel);
+        $order->setLocaleCode($localeCode ?? $this->defaultLocaleCode);
+        $order->setCurrencyCode($order->getChannel()->getBaseCurrency()->getCode());
+
+        /** @var UniqueIdBasedOrderTokenAssigner */
+        $this->container->get('sylius.unique_id_based_order_token_assigner')->assignTokenValue($order);
+
+        $this->container->get("sylius.repository.order")->add($order);
+        return $order;
+    }
+
+    private function setCurrentActiveOrder()
+    {
+        $notCompletedOrder = $this->user->getCustomer()->getOrders()->filter(function (OrderInterface $order) {
+            return !$order->isCheckoutCompleted();
+        });
+
+        if(
+            $this->user->getCustomer()->getOrders()->isEmpty() ||
+            $notCompletedOrder->isEmpty()
+        ) {
+            $this->order = $this->createCart($this->user->getCustomer());
+        } else if(!$notCompletedOrder->isEmpty()) {
+            $this->order = $notCompletedOrder->first();
+        }
     }
 }
