@@ -214,11 +214,11 @@ class FacebookMessengerService extends BotService
     {
         $entry = $this->arrayFlatten($this->request->get('entry'));
 
-        $payload = $entry["payload"];
         if(!key_exists('payload', $entry)) {
             $this->fallbackMessage();
             exit;
         }
+        $payload = $entry["payload"];
 
         if($payload && $this->isJson($payload)) {
             $payload = \GuzzleHttp\json_decode($payload, true);
