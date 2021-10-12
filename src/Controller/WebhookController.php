@@ -15,7 +15,6 @@ use Psr\Container\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use WebDriver\Session;
 
 final class WebhookController extends AbstractController
 {

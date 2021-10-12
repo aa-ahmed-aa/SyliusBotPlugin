@@ -1,0 +1,12 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block title %}{{ 'sylius.message.title'|trans }} | {{ 'sylius.config.title'|trans }} {{ parent() }}{% endblock %}
+
+{% block content %}
+    <div id="app">
+        <h1>Facebook</h1>
+        <facebook-connect></facebook-connect>
+    </div>
+
+
+{% endblock %}

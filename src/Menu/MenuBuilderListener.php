@@ -16,7 +16,7 @@ final class MenuBuilderListener
         $menu = $event->getMenu();
 
         $bots = $menu->addChild('Bots');
-        $bots->addChild('messenger', ['route' => 'sylius_bot_plugin_admin_bot_index'])
+        $bots->addChild('messenger', ['route' => 'ahmedkhd_facebook_connect'])
             ->setLabel('Messenger')
             ->setLabelAttribute('icon', 'facebook')
         ;

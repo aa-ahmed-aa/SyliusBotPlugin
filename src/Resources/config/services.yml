@@ -14,6 +14,14 @@ services:
       - '@logger'
       - '@ahmedkhd_sylius_bot_plugin.service.facebook_messenger'
 
+  ahmedkhd_sylius_bot_plugin.controller.facebook:
+    class: Ahmedkhd\SyliusBotPlugin\Controller\FacebookController
+    tags: ['controller.service_arguments']
+    public: true
+    arguments:
+      - '@service_container'
+      - '@logger'
+
   ahmedkhd_sylius_bot_plugin.service.facebook_messenger:
     class: Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService
     public: true
