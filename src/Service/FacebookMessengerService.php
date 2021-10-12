@@ -177,10 +177,6 @@ class FacebookMessengerService extends BotService
             /** @var OrderItemInterface $orderItem */
             $orderItem = $this->createOrderItem($product);
 
-            $this->container->get('sylius.order_item_quantity_modifier')->modify($orderItem, 1);
-
-            $this->order->addItem($orderItem);
-
             $this->container->get("sylius.order_processing.order_processor")->process($this->order);
 
             $this->container->get("sylius.repository.order")->add($this->order);
@@ -195,11 +191,20 @@ class FacebookMessengerService extends BotService
      */
     public function createOrderItem(ProductInterface $product)
     {
-        /** @var OrderItemInterface $orderItem */
-        $orderItem = $this->container->get("sylius.factory.order_item")->createNew();
+        $orderItem = $this->order->getItems()->filter(function(OrderItemInterface $item) use ($product){
+            return $item->getProduct()->getId() === $product->getId();
+        })->first();
+
+
+        if(empty($orderItem)) {
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $this->container->get("sylius.factory.order_item")->createNew();
+        }
 
         $orderItem->setOrder($this->order);
         $orderItem->setVariant($product->getVariants()->first());
+
+        $this->container->get('sylius.order_item_quantity_modifier')->modify($orderItem, $orderItem->getQuantity() + 1);
 
         $this->container->get("sylius.repository.order_item")->add($orderItem);
 

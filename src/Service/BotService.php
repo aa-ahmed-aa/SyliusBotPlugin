@@ -68,7 +68,7 @@ abstract class BotService extends AbstractService implements BotServiceInterface
              }
 
             $elements[] = Element::create($product->getName())
-                ->subtitle($product->getShortDescription())
+                ->subtitle("Price: {$product->getVariants()->first()->getChannelPricingForChannel($channel)->getPrice()}\n{$product->getShortDescription()}" )
                 ->image($imageUrl)
                 ->addButtons($buttons);
         }

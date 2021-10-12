@@ -91,7 +91,10 @@ final class WebhookController extends AbstractController
         /** @var OrderInterface $order */
         $order = $orderRepository->findCartByTokenValue($cartToken);
 
-        $cartStorage->setForChannel($channelContext->getChannel(), $order);
+        if(!empty($order))
+        {
+            $cartStorage->setForChannel($channelContext->getChannel(), $order);
+        }
 
         return new RedirectResponse($this->generateUrl("sylius_shop_cart_summary"));
     }
