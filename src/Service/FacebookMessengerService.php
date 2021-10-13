@@ -3,8 +3,6 @@
 
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
-
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question;
@@ -20,10 +18,8 @@ use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductInterface;
-use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
 use Sylius\Component\Core\TokenAssigner\UniqueIdBasedOrderTokenAssigner;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
@@ -38,37 +34,8 @@ use GuzzleHttp\Client;
  */
 class FacebookMessengerService extends BotService
 {
-    public $channelName = "messenger";
-
-    const SUPPORTED_PAYLOAD = [
-        "checkout",
-        "empty_cart",
-        "mycart",
-        "list_items",
-        "remove_item_from_cart",
-        "add_to_cart"
-    ];
-
-    /** @var Request */
-    private $request;
-
-    /** @var string */
-    protected $baseUrl;
-
-    /** @var string */
-    protected $defaultLocaleCode;
-
-    /** @var ChannelInterface */
-    protected $defaultChannel;
-
     /** @var Client */
     protected $httpClient;
-
-    /** @var BotSubscriber */
-    protected $user;
-
-    /** @var OrderInterface */
-    protected $order;
 
     /**
      * FacebookMessengerService constructor.
@@ -79,13 +46,6 @@ class FacebookMessengerService extends BotService
     public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
     {
         parent::__construct($container, $logger, $serializer);
-        /**
-         * @psalm-suppress PossiblyFalsePropertyAssignmentValue
-         */
-        $this->baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
-        $this->defaultLocaleCode = $this->container->get('sylius.context.locale')->getLocaleCode();
-        $this->defaultChannel = $this->container->get('sylius.context.channel')->getChannel();
-        $this->httpClient = new Client(['base_uri' => getenv('FACEBOOK_GRAPH_URL')]);
     }
 
     /**
@@ -93,7 +53,7 @@ class FacebookMessengerService extends BotService
      */
     public function flow($request = null): void
     {
-        $this->request = $request;
+        $this->setRequest($request);
         $this->setSubscriber();
 
         //create menu
@@ -159,7 +119,7 @@ class FacebookMessengerService extends BotService
     {
         $payload = $this->getPayload("remove_item_from_cart");
         if(!empty($payload)) {
-            $product_id = $payload["product_id"];
+            $product_id = $payload["item_id"];
             $this->sendMessage(["text" => "product with id {$product_id} will be remove from your cart"]);
         }
     }
@@ -217,7 +177,7 @@ class FacebookMessengerService extends BotService
      */
     public function getPayload(string $type)
     {
-        $entry = $this->arrayFlatten($this->request->get('entry'));
+        $entry = $this->arrayFlatten($this->getRequest()->get('entry'));
 
         if(!key_exists('payload', $entry)) {
             $this->fallbackMessage();
@@ -277,7 +237,25 @@ class FacebookMessengerService extends BotService
     public function listItemsInCart()
     {
         if(!empty($this->getPayload("mycart"))) {
-            $this->sendMessage(["text" => "i will list items in your cart"]);
+            if($this->order->getItems()->isEmpty()) {
+                $this->sendMessage(['text' => 'Your cart is empty']);
+                return;
+            }
+            $this->sendMessage(
+                $this->getReceiptTemplate(
+                    "Checkout",
+                    $this->getCheckoutUrl(),
+                    array_map(function(OrderItemInterface $item) {
+                        return [
+                            'item_id' => $item->getId(),
+                            'title' => $item->getProductName(),
+                            'description' => $item->getVariant()->getChannelPricingForChannel($this->defaultChannel)->getPrice() * 10,
+                            'image' => $this->getProductImageUrl($item->getProduct()),
+                            'quantity' => $item->getQuantity()
+                        ];
+                    }, $this->order->getItems()->toArray())
+                )
+            );
         }
     }
 
@@ -336,7 +314,7 @@ class FacebookMessengerService extends BotService
                 [
                     "type" => "web_url",
                     "title" => "Visit my Website",
-                    "url" => "{$this->baseUrl}"
+                    "url" => getenv("APP_URL")
                 ]
             ]
         ];
@@ -358,7 +336,7 @@ class FacebookMessengerService extends BotService
         $body = [
             "messaging_type" => "RESPONSE",
             "recipient" => [
-                "id" => $this->request->get('entry')[0]['messaging'][0]["sender"]["id"]
+                "id" => $this->getRequest()->get('entry')[0]['messaging'][0]["sender"]["id"]
             ],
             "message" => $message
         ];
@@ -408,7 +386,7 @@ class FacebookMessengerService extends BotService
 
     public function setSubscriber()
     {
-        $botSubscriberId = isset($this->request->get('entry')[0]['messaging'][0]['sender']['id']) ? $this->request->get('entry')[0]['messaging'][0]['sender']['id'] : null;
+        $botSubscriberId = isset($this->getRequest()->get('entry')[0]['messaging'][0]['sender']['id']) ? $this->getRequest()->get('entry')[0]['messaging'][0]['sender']['id'] : null;
 
         /** @var BotSubscriberInterface $botSubscriber */
         $botSubscriber = $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->findOneBy([ 'botSubscriberId' => $botSubscriberId]);
@@ -434,7 +412,10 @@ class FacebookMessengerService extends BotService
     {
         $payload = $this->getPayload("checkout");
         if(!empty($payload)) {
-            $this->container->get("sylius.storage.cart_session")->setForChannel($this->defaultChannel, $this->order);
+            if($this->order->getItems()->isEmpty()) {
+                $this->sendMessage(['text' => 'Your cart is empty']);
+                return;
+            }
 
             $checkoutUrl = $this->container->get("router")->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
 
