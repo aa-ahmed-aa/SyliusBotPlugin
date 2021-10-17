@@ -7,6 +7,7 @@ namespace Ahmedkhd\SyliusBotPlugin\Controller;
 use Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService;
 use Psr\Log\LoggerInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 use Sylius\Component\Core\Storage\CartStorageInterface;
@@ -65,6 +66,7 @@ final class WebhookController extends AbstractController
     /**
      * @param Request $request
      * @return Response
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function messengerWebhook(Request $request): Response
     {
@@ -90,9 +92,10 @@ final class WebhookController extends AbstractController
         /** @var OrderInterface $order */
         $order = $orderRepository->findCartByTokenValue($cartToken);
 
-        if(!empty($order))
+        if($order != null)
         {
-            $cartStorage->setForChannel($channelContext->getChannel(), $order);
+            $channel = $this->container->get('sylius.repository.channel')->findOneById($channelContext->getChannel()->getId());
+            $cartStorage->setForChannel($channel, $order);
         }
 
         return new RedirectResponse($this->generateUrl("sylius_shop_cart_summary"));

@@ -105,19 +105,19 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param string $paige_access_token
+     * @param string $page_access_token
      */
-    public function setPaigeAccessToken(string $paige_access_token): void
+    public function setPaigeAccessToken(string $page_access_token): void
     {
-        $this->paige_access_token = $paige_access_token;
+        $this->page_access_token = $page_access_token;
     }
 
     /**
      * @return mixed
      */
-    public function getPaigeAccessToken()
+    public function getPageAccessToken()
     {
-        return $this->paige_access_token;
+        return $this->page_access_token;
     }
 
     /**

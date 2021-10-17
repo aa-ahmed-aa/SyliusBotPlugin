@@ -41,7 +41,7 @@ interface BotInterface extends ResourceInterface
     /**
      * @return mixed
      */
-    public function getPaigeAccessToken();
+    public function getPageAccessToken();
 
     /**
      * @param string $page_image_url

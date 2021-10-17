@@ -5,19 +5,45 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
+use Sylius\Component\Core\Model\ProductImageInterface;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Core\Repository\CustomerRepositoryInterface;
+use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
+use Sylius\Component\Core\Repository\OrderRepositoryInterface;
 use Sylius\Component\Core\TokenAssigner\UniqueIdBasedOrderTokenAssigner;
+use Sylius\Component\Currency\Model\CurrencyInterface;
+use Sylius\Component\Order\Modifier\OrderItemQuantityModifierInterface;
+use Sylius\Component\Resource\Factory\FactoryInterface;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Routing\RouterInterface;
 
 abstract class AbstractBotService
 {
     /** @var ContainerInterface */
     protected $container;
+
+    /** @var OrderInterface */
+    protected $order;
+
+    /** @var BotSubscriberInterface */
+    protected $user;
+
+    /** @var string */
+    protected $defaultLocaleCode;
+
+    /** @var ChannelInterface */
+    protected $defaultChannel;
+
+    /** @var string $channelName */
+    public $channelName = "messenger";
 
     /**
      * AbstractBotService constructor.
@@ -33,8 +59,50 @@ abstract class AbstractBotService
      */
     public function getCheckoutUrl()
     {
+        /** @var RouterInterface $router */
+        $router = $this->container->get("router");
         return getenv("APP_URL") .
-            $this->container->get("router")->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+            $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+    }
+
+    /**
+     * @return OrderInterface
+     */
+    public function getOrder(): OrderInterface
+    {
+        return $this->order;
+    }
+
+    /**
+     * @return BotSubscriberInterface
+     */
+    public function getUser(): BotSubscriberInterface
+    {
+        return $this->user;
+    }
+
+    /**
+     * @return ChannelInterface
+     */
+    public function getDefaultChannel(): ChannelInterface
+    {
+        return $this->defaultChannel;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultLocaleCode(): string
+    {
+        return $this->defaultLocaleCode;
+    }
+
+    /**
+     * @return string
+     */
+    public function getChannelName(): string
+    {
+        return $this->channelName;
     }
 
     /**
@@ -43,14 +111,21 @@ abstract class AbstractBotService
      */
     public function getProductImageUrl(ProductInterface $product)
     {
+        /** @var CacheManager $imagineCacheManager */
         $imagineCacheManager = $this->container->get('liip_imagine.cache.manager');
 
         $imageUrl = "https://via.placeholder.com/200x200";
 
-        if (!empty($product->getImagesByType('thumbnail')->first())) {
-            $imageUrl = $imagineCacheManager->getBrowserPath($product->getImagesByType('thumbnail')->first()->getPath(), 'sylius_shop_product_thumbnail');
-        } else if($product->getImages()->first()) {
-            $imageUrl = $imagineCacheManager->getBrowserPath($product->getImages()->first()->getPath(), 'sylius_shop_product_thumbnail');
+        /** @var ProductImageInterface $image */
+        $image = $product->getImagesByType('thumbnail')->first();
+
+        /** @var ProductImageInterface $image */
+        $firstImage = $product->getImages()->first();
+
+        if ($image != null) {
+            $imageUrl = $imagineCacheManager->getBrowserPath($image->getPath() ?? "", 'sylius_shop_product_thumbnail');
+        } else if($firstImage != null) {
+            $imageUrl = $imagineCacheManager->getBrowserPath($firstImage->getPath() ?? "", 'sylius_shop_product_thumbnail');
         }
 
         return $imageUrl;
@@ -67,18 +142,33 @@ abstract class AbstractBotService
         ChannelInterface $channel = null,
         $localeCode = null
     ) {
-        /** @var OrderInterface $order */
-        $order = $this->container->get("sylius.factory.order")->createNew();
+        /** @var FactoryInterface $orderFactory */
+        $orderFactory = $this->container->get("sylius.factory.order");
 
-        $order->setCustomer($customer ?? $this->user->getCustomer());
-        $order->setChannel($channel ?? $this->defaultChannel);
-        $order->setLocaleCode($localeCode ?? $this->defaultLocaleCode);
-        $order->setCurrencyCode($order->getChannel()->getBaseCurrency()->getCode());
+        /** @var OrderInterface $order */
+        $order = $orderFactory->createNew();
+
+        /** @var ChannelInterface $channel */
+        $channel = $order->getChannel();
 
         /** @var UniqueIdBasedOrderTokenAssigner */
-        $this->container->get('sylius.unique_id_based_order_token_assigner')->assignTokenValue($order);
+        $uniqueIdBasedOrderTokenAssigner = $this->container->get('sylius.unique_id_based_order_token_assigner');
 
-        $this->container->get("sylius.repository.order")->add($order);
+        /** @var OrderRepositoryInterface $orderRepository */
+        $orderRepository = $this->container->get("sylius.repository.order");
+
+        /** @var CurrencyInterface $baseCurrency */
+        $baseCurrency = $channel->getBaseCurrency();
+
+        $order->setCustomer($customer ?? $this->user->getCustomer());
+        $order->setChannel($channel ?? $this->getDefaultChannel());
+        $order->setLocaleCode($localeCode ?? $this->getDefaultLocaleCode());
+        $order->setCurrencyCode($baseCurrency->getCode());
+
+        $uniqueIdBasedOrderTokenAssigner->assignTokenValue($order);
+
+        $orderRepository->add($order);
+
         return $order;
     }
 
@@ -88,14 +178,20 @@ abstract class AbstractBotService
      */
     public function createBotCustomerAndAssignSubscriber(array $subscriberData)
     {
+        /** @var FactoryInterface $customerFactory */
+        $customerFactory = $this->container->get("sylius.factory.customer");
+
+        /** @var CustomerRepositoryInterface $customerRepository */
+        $customerRepository = $this->container->get("sylius.repository.customer");
+
         /** @var Customer $customer */
-        $customer = $this->container->get("sylius.factory.customer")->createNew();
+        $customer = $customerFactory->createNew();
         $customer->setFirstName($subscriberData["first_name"]);
         $customer->setLastName($subscriberData["last_name"]);
         $customer->setGender($subscriberData["gender"] === "male" ? CustomerInterface::MALE_GENDER : ($subscriberData["gender"] === "female" ? CustomerInterface::FEMALE_GENDER : CustomerInterface::UNKNOWN_GENDER));
         $customer->setEmail("{$subscriberData["id"]}@messenger.com");
 
-        $this->container->get("sylius.repository.customer")->add($customer);
+        $customerRepository->add($customer);
 
         return $customer;
     }
@@ -107,8 +203,14 @@ abstract class AbstractBotService
      */
     public function createBotSubscriber(array $subscriberData, CustomerInterface $customer)
     {
+        /** @var FactoryInterface $botSubscriberFactory */
+        $botSubscriberFactory = $this->container->get('sylius_bot_plugin.factory.bot_subscriber');
+
+        /** @var RepositoryInterface $botSubscriberRepository */
+        $botSubscriberRepository = $this->container->get('sylius_bot_plugin.repository.bot_subscriber');
+
         /** @var BotSubscriberInterface $botSubscriber */
-        $botSubscriber = $this->container->get('sylius_bot_plugin.factory.bot_subscriber')->createNew();
+        $botSubscriber = $botSubscriberFactory->createNew();
 
         $botSubscriber->setChannel($this->channelName);
         $botSubscriber->setName($subscriberData["name"]);
@@ -121,7 +223,7 @@ abstract class AbstractBotService
         $botSubscriber->setBotSubscriberId($subscriberData["id"]);
         $botSubscriber->setCustomer($customer);
 
-        $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->add($botSubscriber);
+        $botSubscriberRepository->add($botSubscriber);
 
         return $botSubscriber;
     }
@@ -132,22 +234,37 @@ abstract class AbstractBotService
      */
     public function createOrderItem(ProductInterface $product)
     {
-        $orderItem = $this->order->getItems()->filter(function(OrderItemInterface $item) use ($product){
-            return $item->getProduct()->getId() === $product->getId();
+        /** @var FactoryInterface $orderItemFactory */
+        $orderItemFactory = $this->container->get("sylius.factory.order_item");
+
+        /** @var OrderItemQuantityModifierInterface $orderItemQuantityModifier */
+        $orderItemQuantityModifier = $this->container->get('sylius.order_item_quantity_modifier');
+
+        /** @var OrderItemRepositoryInterface $orderItemRepository */
+        $orderItemRepository = $this->container->get("sylius.repository.order_item");
+
+        /** @var OrderItemInterface $orderItem */
+        $orderItem = $this->order->getItems()->filter(function(OrderItemInterface $item) use ($product): bool {
+            /** @var ProductInterface $product */
+            $product = $item->getProduct();
+            return $product->getId() === $product->getId();
         })->first();
 
 
-        if(empty($orderItem)) {
+        if($orderItem != null) {
             /** @var OrderItemInterface $orderItem */
-            $orderItem = $this->container->get("sylius.factory.order_item")->createNew();
+            $orderItem = $orderItemFactory->createNew();
         }
 
+        /** @var ProductVariantInterface $variant */
+        $variant = $product->getVariants()->first();
+
         $orderItem->setOrder($this->order);
-        $orderItem->setVariant($product->getVariants()->first());
+        $orderItem->setVariant($variant);
 
-        $this->container->get('sylius.order_item_quantity_modifier')->modify($orderItem, $orderItem->getQuantity() + 1);
+        $orderItemQuantityModifier->modify($orderItem, $orderItem->getQuantity() + 1);
 
-        $this->container->get("sylius.repository.order_item")->add($orderItem);
+        $orderItemRepository->add($orderItem);
 
         return $orderItem;
     }

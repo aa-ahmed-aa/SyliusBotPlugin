@@ -66,7 +66,7 @@ trait FacebookMessengerTrait
      * @param array $buttons
      * @return Element
      */
-    public function createCaroselCard($name = "", $subtitle = "", $image = "", $buttons = [])
+    public function createCaroselCard($name = null, $subtitle = "", $image = "", $buttons = [])
     {
         return Element::create($name)
             ->subtitle($subtitle)
@@ -83,23 +83,26 @@ trait FacebookMessengerTrait
     public function createReceiptTemplate(string $actionButtonText, string $actionButtonUrl, array $elements)
     {
         $items = $this->createReceiptElements($elements);
+        $createdAt = $this->getOrder()->getCreatedAt();
+        $baseCurrency = $this->getDefaultChannel()->getBaseCurrency();
+
         return ReceiptTemplate::create()
             ->recipientName($actionButtonText)
             ->merchantName($this->getDefaultChannel()->getName())
             ->orderNumber($this->getOrder()->getId())
-            ->timestamp($this->getOrder()->getCreatedAt()->getTimestamp())
+            ->timestamp($createdAt != null ? $createdAt->getTimestamp() : "")
             ->orderUrl($actionButtonUrl)
             ->paymentMethod('Visa | Bank Transfer | Cash on delivery')
-            ->currency($this->getDefaultChannel()->getBaseCurrency()->getCode())
+            ->currency($baseCurrency != null ? $baseCurrency->getCode() : "")
             ->addElements($items)
             ->addSummary(ReceiptSummary::create()
-                ->subtotal($this->getOrder()->getItemsTotal() * 10)
-                ->shippingCost($this->getOrder()->getShippingTotal() *10)
-                ->totalTax($this->getOrder()->getTaxTotal() * 10)
-                ->totalCost($this->getOrder()->getTotal() * 10)
+                ->subtotal((string)($this->getOrder()->getItemsTotal() * 10))
+                ->shippingCost((string)($this->getOrder()->getShippingTotal() *10))
+                ->totalTax((string)($this->getOrder()->getTaxTotal() * 10))
+                ->totalCost((string)($this->getOrder()->getTotal() * 10))
             )
             ->addAdjustment(ReceiptAdjustment::create('Adjustment')
-                ->amount($this->getOrder()->getAdjustmentsTotal() / 100)
+                ->amount((string)($this->getOrder()->getAdjustmentsTotal() / 100))
             );
     }
 
@@ -110,12 +113,14 @@ trait FacebookMessengerTrait
     public function createReceiptElements(array $elements)
     {
         $items = [];
+        $baseCurrency = $this->getDefaultChannel()->getBaseCurrency();
+
         foreach ($elements as $element)
         {
             $items[] = ReceiptElement::create($element["title"])
                 ->price((double)$element["description"])
                 ->quantity($element["quantity"])
-                ->currency($this->getDefaultChannel()->getBaseCurrency()->getCode())
+                ->currency($baseCurrency != null ? $baseCurrency->getCode() : "")
                 ->image($element["image"]);
         }
 

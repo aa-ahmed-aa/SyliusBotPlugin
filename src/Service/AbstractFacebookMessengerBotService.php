@@ -3,19 +3,27 @@
 
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use Ahmedkhd\SyliusBotPlugin\Traits\FacebookMessengerTrait;
 use Ahmedkhd\SyliusBotPlugin\Traits\HelperTrait;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
-use BotMan\BotMan\Messages\Outgoing\Question;
+use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
+use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
+use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Core\Model\ChannelPricingInterface;
 use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\Product;
+use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Currency\Model\CurrencyInterface;
+use Sylius\Component\Locale\Context\LocaleContextInterface;
+use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -33,25 +41,14 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     /** @var SerializerInterface */
     protected $serializer;
 
-    /** @var BotSubscriber */
-    protected $user;
-
-    /** @var OrderInterface */
-    protected $order;
-
     /** @var Request */
     private $request;
 
     /** @var string */
     protected $baseUrl;
 
-    /** @var string */
-    protected $defaultLocaleCode;
-
-    /** @var ChannelInterface */
-    protected $defaultChannel;
-
-    public $channelName = "messenger";
+    /** @var Client */
+    protected $httpClient;
 
     /**
      * BotService constructor.
@@ -62,39 +59,23 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     public function __construct(ContainerInterface $container, LoggerInterface $logger, SerializerInterface $serializer)
     {
         parent::__construct($container);
+
+        /** @var LocaleContextInterface $localContext */
+        $localContext = $this->container->get('sylius.context.locale');
+
+        /** @var ChannelContextInterface $channelContext */
+        $channelContext = $this->container->get('sylius.context.channel');
+
         /**
          * @psalm-suppress PossiblyFalsePropertyAssignmentValue
          */
         $this->logger = $logger;
         $this->serializer = $serializer;
         $this->baseUrl = getenv('APP_URL') === false ? "https://www.google.com" : getenv('APP_URL');
-        $this->defaultLocaleCode = $this->container->get('sylius.context.locale')->getLocaleCode();
-        $this->defaultChannel = $this->container->get('sylius.context.channel')->getChannel();
+        $this->defaultLocaleCode = $localContext->getLocaleCode();
+        /** @phpstan-ignore-next-line */
+        $this->defaultChannel = $channelContext->getChannel();
         $this->httpClient = new Client(['base_uri' => getenv('FACEBOOK_GRAPH_URL')]);
-    }
-
-    /**
-     * @return OrderInterface
-     */
-    public function getOrder(): OrderInterface
-    {
-        return $this->order;
-    }
-
-    /**
-     * @return ChannelInterface
-     */
-    public function getDefaultChannel(): ChannelInterface
-    {
-        return $this->defaultChannel;
-    }
-
-    /**
-     * @return BotSubscriber
-     */
-    public function getUser(): BotSubscriber
-    {
-        return $this->user;
     }
 
     /**
@@ -152,9 +133,19 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
         /** @var Product $product */
         foreach ($products as $product) {
             $buttons = [];
+
+            /** @var ProductVariantInterface $productVariant */
+            $productVariant = $product->getVariants()->first();
+
+            /** @var ChannelPricingInterface $channelPricing */
+            $channelPricing = $productVariant->getChannelPricingForChannel($channel);
+
+            /** @var CurrencyInterface $baseCurrency */
+            $baseCurrency = $channel->getBaseCurrency();
+
             if($product->isSimple()) {
                 $buttons[] = $this->createButton(
-                    "Add to cart (" . $product->getVariants()->first()->getChannelPricingForChannel($channel)->getPrice() / 100 . " {$channel->getBaseCurrency()->getCode()})",
+                    "Add to cart (" . (integer)$channelPricing->getPrice() / 100 . " {$baseCurrency->getCode()})",
                     "postback",
                     \GuzzleHttp\json_encode([
                         "type" => "add_to_cart",
@@ -172,12 +163,13 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
 
             $elements[] = $this->createCaroselCard(
                 $product->getName(),
-                "Price: " . $product->getVariants()->first()->getChannelPricingForChannel($channel)->getPrice() / 100 . " " . $this->getDefaultChannel()->getBaseCurrency()->getCode() ."\n{$product->getShortDescription()}",
+                "Price: " . (int)$channelPricing->getPrice() / 100 . " " . $baseCurrency->getCode() ."\n{$product->getShortDescription()}",
                 $this->getProductImageUrl($product),
                 $buttons
             );
         }
 
+        /** @phpstan-ignore-next-line */
         if(!(count($products) < 9)) {
             $elements[] = $this->createCaroselCard(
                 "See More",
@@ -206,6 +198,18 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
 
         /** @var OrderItemInterface $item */
         foreach ($orderItems as $item) {
+            /** @var ProductInterface $product */
+            $product = $item->getProduct();
+
+            /** @var ProductVariantInterface $variant */
+            $variant = $item->getVariant();
+
+            /** @var ChannelPricingInterface $channelPricing */
+            $channelPricing = $variant->getChannelPricingForChannel($this->defaultChannel);
+
+            /** @var CurrencyInterface $baseCurrency */
+            $baseCurrency = $this->getDefaultChannel()->getBaseCurrency();
+
             $buttons = [
                 $this->createButton(
                     "Remove from cart",
@@ -219,14 +223,14 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
                     "View On Website",
                     "url",
                     "",
-                    "{$this->baseUrl}/{$this->defaultLocaleCode}/products/{$item->getProduct()->getSlug()}"
+                    "{$this->baseUrl}/{$this->defaultLocaleCode}/products/{$product->getSlug()}"
                 )
             ];
 
             $elements[] = $this->createCaroselCard(
                 $item->getProductName(),
-                "Price: " . $item->getVariant()->getChannelPricingForChannel($this->defaultChannel)->getPrice() / 100 . " " . $this->getDefaultChannel()->getBaseCurrency()->getCode() ."\nQty: {$item->getQuantity()}",
-                $this->getProductImageUrl($item->getProduct()),
+                "Price: " . (int)$channelPricing->getPrice() / 100 . " " . $baseCurrency->getCode() ."\nQty: {$item->getQuantity()}",
+                $this->getProductImageUrl($product),
                 $buttons
             );
         }
@@ -256,7 +260,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     }
 
     /**
-     * @param string|array|OutgoingMessage|Question $message
+     * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
      * @return ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -279,12 +283,12 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
 
     /**
      * @param string $url
-     * @param array|null $body
-     * @param string|null $method
-     * @return ResponseInterface|null
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param array $body
+     * @param string $method
+     * @return mixed|ResponseInterface|void
+     * @throws GuzzleException
      */
-    public function sendFacebookRequest(string $url, ?array $body = [], ?string $method = Request::METHOD_GET)
+    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET)
     {
         try {
             return $this->httpClient->request(
@@ -292,10 +296,10 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
                 $url,
                 $this->getRequestOption($body)
             );
-        } catch (GuzzleException $e) {
+        } catch (\Exception $e) {
             $this->logger->critical($e->getMessage());
+            return;
         }
-        return null;
     }
 
     /**
@@ -304,9 +308,11 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
      */
     public function getRequestOption(array $body)
     {
-        $options[RequestOptions::HEADERS] = [
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json',
+        $options = [
+            RequestOptions::HEADERS => [
+                "Content-Type" => "application/json",
+                "Accept" => "application/json",
+            ]
         ];
 
         $options[RequestOptions::JSON] = $body;
@@ -317,20 +323,23 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function setSubscriber()
+    public function setSubscriber(): void
     {
         $botSubscriberId = isset($this->getRequest()->get('entry')[0]['messaging'][0]['sender']['id']) ? $this->getRequest()->get('entry')[0]['messaging'][0]['sender']['id'] : null;
 
-        /** @var BotSubscriberInterface $botSubscriber */
-        $botSubscriber = $this->container->get('sylius_bot_plugin.repository.bot_subscriber')->findOneBy([ 'botSubscriberId' => $botSubscriberId]);
+        /** @var RepositoryInterface $botSubscriberRepository */
+        $botSubscriberRepository = $this->container->get('sylius_bot_plugin.repository.bot_subscriber');
 
-        if(empty($botSubscriber)) {
+        /** @var BotSubscriberInterface $botSubscriber */
+        $botSubscriber = $botSubscriberRepository->findOneBy([ 'botSubscriberId' => $botSubscriberId]);
+
+        if($botSubscriber == null) {
             $fields = 'name,first_name,last_name,profile_pic,locale,timezone,gender';
 
             $response = $this->sendFacebookRequest("/{$botSubscriberId}?fields={$fields}&access_token=".getenv('FACEBOOK_PAGE_ACCESS_TOKEN'));
             $subscriberData = \GuzzleHttp\json_decode($response->getBody(), true);
 
-            /** @var CustomerInterface $botCustomer */
+            /** @var CustomerInterface $customer */
             $customer = $this->createBotCustomerAndAssignSubscriber($subscriberData);
 
             /** @var BotSubscriberInterface $botSubscriber */
@@ -344,9 +353,9 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     /**
      * Set Current Active Bot Order
      */
-    public function setCurrentActiveOrder()
+    public function setCurrentActiveOrder(): void
     {
-        $notCompletedOrder = $this->user->getCustomer()->getOrders()->filter(function (OrderInterface $order) {
+        $notCompletedOrder = $this->user->getCustomer()->getOrders()->filter(function (OrderInterface $order): bool {
             return !$order->isCheckoutCompleted();
         });
 

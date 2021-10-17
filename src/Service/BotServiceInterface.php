@@ -5,8 +5,11 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
+use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question;
+use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
+use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;
 use Psr\Http\Message\ResponseInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\OrderInterface;
@@ -26,9 +29,9 @@ interface BotServiceInterface
     public function getDefaultChannel(): ChannelInterface;
 
     /**
-     * @return BotSubscriber
+     * @return BotSubscriberInterface
      */
-    public function getUser(): BotSubscriber;
+    public function getUser(): BotSubscriberInterface;
 
     /**
      * @return Request
@@ -69,7 +72,7 @@ interface BotServiceInterface
     public function updatePresistentMenu($menuItems = []): Response;
 
     /**
-     * @param string|array|OutgoingMessage|Question $message
+     * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
      * @return ResponseInterface|null
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
@@ -77,12 +80,11 @@ interface BotServiceInterface
 
     /**
      * @param string $url
-     * @param array|null $body
-     * @param string|null $method
-     * @return ResponseInterface|null
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param array $body
+     * @param string $method
+     * @return mixed
      */
-    public function sendFacebookRequest(string $url, ?array $body = [], ?string $method = Request::METHOD_GET);
+    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET);
 
     /**
      * @param array $body
@@ -93,10 +95,10 @@ interface BotServiceInterface
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function setSubscriber();
+    public function setSubscriber(): void;
 
     /**
      * Set Current Active Bot Order
      */
-    public function setCurrentActiveOrder();
+    public function setCurrentActiveOrder(): void;
 }

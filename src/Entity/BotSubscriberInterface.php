@@ -4,6 +4,7 @@
 namespace Ahmedkhd\SyliusBotPlugin\Entity;
 
 
+use Sylius\Component\Core\Model\CustomerInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 
 interface BotSubscriberInterface extends ResourceInterface
@@ -102,4 +103,14 @@ interface BotSubscriberInterface extends ResourceInterface
      * @return string|null
      */
     public function getChannel(): ?string;
+
+    /**
+     * @param CustomerInterface $customer
+     */
+    public function setCustomer(CustomerInterface $customer): void;
+
+    /**
+     * @return CustomerInterface
+     */
+    public function getCustomer(): CustomerInterface;
 }

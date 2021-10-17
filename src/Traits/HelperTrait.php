@@ -6,23 +6,20 @@ namespace Ahmedkhd\SyliusBotPlugin\Traits;
 trait HelperTrait
 {
     /**
-     * @param $string
+     * @param string $string
      * @return bool
      */
-    public function  isJson($string) {
+    public function  isJson(string $string) {
         \GuzzleHttp\json_decode($string);
         return json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
      * Convert array multidimensional array to flat array
-     * @param $array
-     * @return array|bool
+     * @param array $array
+     * @return array
      */
-    function arrayFlatten($array) {
-        if (!is_array($array)) {
-            return false;
-        }
+    function arrayFlatten(array $array) {
         $result = array();
         foreach ($array as $key => $value) {
             if (is_array($value)) {

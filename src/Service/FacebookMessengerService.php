@@ -7,8 +7,18 @@ use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
 use GuzzleHttp\Exception\GuzzleException;
+use Sylius\Component\Core\Model\ChannelPricingInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductInterface;
+use Sylius\Component\Core\Model\ProductVariantInterface;
+use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
+use Sylius\Component\Core\Repository\OrderRepositoryInterface;
+use Sylius\Component\Order\Modifier\OrderModifier;
+use Sylius\Component\Order\Modifier\OrderModifierInterface;
+use Sylius\Component\Order\Processor\OrderProcessorInterface;
+use Sylius\Component\Resource\Repository\RepositoryInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
@@ -21,9 +31,6 @@ use GuzzleHttp\Client;
  */
 class FacebookMessengerService extends AbstractFacebookMessengerBotService
 {
-    /** @var Client */
-    protected $httpClient;
-
     /**
      * FacebookMessengerService constructor.
      * @param ContainerInterface $container
@@ -36,16 +43,16 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     }
 
     /**
-     * @param null $request
+     * @param Request $request
      * @throws GuzzleException
      */
-    public function flow($request = null): void
+    public function flow(Request $request): void
     {
         $this->setRequest($request);
         $this->setSubscriber();
 
         $payload = $this->getPayload();
-        if(empty($payload))
+        if($payload === null || $payload === [])
         {
             $this->fallbackMessage();
             exit;
@@ -83,7 +90,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * Send Fallback message
      * @throws GuzzleException
      */
-    public function fallbackMessage()
+    public function fallbackMessage(): void
     {
         $this->sendMessage($this->createButtonTemplate("Sorry i can't understand you💅", [
             $this->createButton("List Products", "postback", \GuzzleHttp\json_encode([
@@ -99,10 +106,14 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * @param array $payload
      * @throws GuzzleException
      */
-    public function listProducts($payload = [])
+    public function listProducts($payload): void
     {
-        if(!empty($payload)) {
-            /** @var Pagerfanta $productsPaginator */
+        if($payload != null && $payload != []) {
+
+            /**
+             * @phpstan-ignore-next-line
+             * @var Pagerfanta $productsPaginator
+             */
             $productsPaginator = $this->container->get('sylius.repository.product')->createPaginator();
             $productsPaginator->setCurrentPage($payload['page'] ?? 1);
             $productsPaginator->setMaxPerPage(9);
@@ -118,26 +129,44 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * @param array $payload
      * @throws GuzzleException
      */
-    public function removeFromCart($payload = [])
+    public function removeFromCart($payload = []): void
     {
         $item_id = $payload["item_id"];
-        /** @var OrderItemInterface $orderItem */
-        $orderItem = $this->container->get('sylius.repository.order_item')->findOneById($item_id);
+        /** @var OrderModifierInterface $orderModifier */
+        $orderModifier =$this->container->get('sylius.order_modifier');
 
-        $this->container->get('sylius.order_modifier')->removeFromOrder($this->order, $orderItem);
+        /** @var OrderItemRepositoryInterface $orderRepository */
+        $orderRepository = $this->container->get('sylius.repository.order');
 
-        $this->container->get('sylius.repository.order')->add($this->order);
+        /** @var RepositoryInterface $orderItemRepository */
+        $orderItemRepository = $this->container->get('sylius.repository.order_item');
 
-        $this->sendMessage(["text" => "*{$orderItem->getProduct()->getName()}* removed from your cart"]);
+        /**
+         * @phpstan-ignore-next-line
+         * @var OrderItemInterface $orderItem
+         */
+        $orderItem = $orderItemRepository->findOneById($item_id);
+
+        $orderModifier->removeFromOrder($this->order, $orderItem);
+
+        $orderRepository->add($this->order);
+
+        /** @var ProductInterface $product */
+        $product = $orderItem->getProduct();
+
+        $this->sendMessage(["text" => "*{$product->getName()}* removed from your cart"]);
     }
 
     /**
      * Empty the cart in one click
+     * @throws GuzzleException
      */
-    public function emptyCart()
+    public function emptyCart(): void
     {
-        if(!empty($this->order)) {
-            $this->container->get('sylius.repository.order')->remove($this->order);
+        if($this->order != null) {
+            /** @var OrderRepositoryInterface $orderRepository */
+            $orderRepository = $this->container->get('sylius.repository.order');
+            $orderRepository->remove($this->order);
         }
         $this->sendMessage(["text" => "I have removed all the items from your cart"]);
     }
@@ -147,17 +176,28 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * @param array $payload
      * @throws GuzzleException
      */
-    public function addToCart($payload = [])
+    public function addToCart($payload = []): void
     {
-        /** @var ProductInterface $product */
-        $product = $this->container->get("sylius.repository.product")->findOneById($payload["product_id"]);
+        /** @var OrderRepositoryInterface $productRepository */
+        $productRepository = $this->container->get("sylius.repository.product");
 
-        /** @var OrderItemInterface $orderItem */
-        $orderItem = $this->createOrderItem($product);
+        /** @var OrderProcessorInterface $orderProcessor */
+        $orderProcessor = $this->container->get("sylius.order_processing.order_processor");
 
-        $this->container->get("sylius.order_processing.order_processor")->process($this->order);
+        /** @var OrderRepositoryInterface $orderRepository */
+        $orderRepository = $this->container->get("sylius.repository.order");
 
-        $this->container->get("sylius.repository.order")->add($this->order);
+        /**
+         * @phpstan-ignore-next-line
+         * @var ProductInterface $product
+         */
+        $product = $productRepository->findOneById($payload["product_id"]);
+
+        $this->createOrderItem($product);
+
+        $orderProcessor->process($this->order);
+
+        $orderRepository->add($this->order);
 
         $this->sendMessage(["text" => "*{$product->getName()}* add to your cart"]);
     }
@@ -165,7 +205,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     /**
      * List items in cart
      */
-    public function listItemsInCart()
+    public function listItemsInCart(): void
     {
         if($this->order->getItems()->isEmpty()) {
             $this->sendMessage(['text' => 'Your cart is empty']);
@@ -179,7 +219,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     /**
      * List items in cart
      */
-    public function orderSummery()
+    public function orderSummery(): void
     {
         if($this->order->getItems()->isEmpty()) {
             $this->sendMessage(['text' => 'Your cart is empty']);
@@ -189,12 +229,24 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
             $this->createReceiptTemplate(
                 "Checkout",
                 $this->getCheckoutUrl(),
-                array_map(function(OrderItemInterface $item) {
+                array_map(function(OrderItemInterface $item): array {
+                    /** @var ProductInterface $product */
+                    $product = $item->getProduct();
+
+                    /** @var ProductVariantInterface $variant */
+                    $variant = $item->getVariant();
+
+                    /** @var ChannelPricingInterface $variantChannelPricing */
+                    $variantChannelPricing = $variant->getChannelPricingForChannel($this->defaultChannel);
+
+                    /** @var integer $price */
+                    $price = $variantChannelPricing->getPrice();
+
                     return [
                         'item_id' => $item->getId(),
                         'title' => $item->getProductName(),
-                        'description' => $item->getVariant()->getChannelPricingForChannel($this->defaultChannel)->getPrice() * 10,
-                        'image' => $this->getProductImageUrl($item->getProduct()),
+                        'description' => $price * 10,
+                        'image' => $this->getProductImageUrl($product),
                         'quantity' => $item->getQuantity()
                     ];
                 }, $this->order->getItems()->toArray())
@@ -219,14 +271,17 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     /**
      * Checkout in messenger
      */
-    public function checkout()
+    public function checkout(): void
     {
         if($this->order->getItems()->isEmpty()) {
             $this->sendMessage(['text' => 'Your cart is empty']);
             return;
         }
 
-        $checkoutUrl = $this->container->get("router")->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+        /** @var RouterInterface $router */
+        $router = $this->container->get("router");
+
+        $checkoutUrl = $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
 
         $this->sendMessage(
             ButtonTemplate::create("Are you sure you want to checkout 🛒?")
