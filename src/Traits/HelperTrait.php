@@ -23,8 +23,6 @@ trait HelperTrait
         $result = array();
         /**
          * @psalm-suppress RedundantCondition
-         * @var int $key
-         * @var array $value
          */
         foreach ($array as $key => $value) {
             if (is_array($value)) {

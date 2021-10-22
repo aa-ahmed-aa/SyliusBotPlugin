@@ -250,7 +250,7 @@ abstract class AbstractBotService
             return $product->getId() === $product->getId();
         })->first();
 
-        if($orderItem === null || $orderItem === false) {
+        if($orderItem == null || $orderItem == false) {
             /** @var OrderItemInterface $orderItem */
             $orderItem = $orderItemFactory->createNew();
         }
