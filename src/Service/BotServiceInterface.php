@@ -4,10 +4,8 @@
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
-use BotMan\BotMan\Messages\Outgoing\Question;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;
 use Psr\Http\Message\ResponseInterface;

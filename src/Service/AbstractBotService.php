@@ -158,7 +158,7 @@ abstract class AbstractBotService
         $orderRepository = $this->container->get("sylius.repository.order");
 
         /** @var CurrencyInterface $baseCurrency */
-        $baseCurrency = $channel->getBaseCurrency();
+        $baseCurrency = $this->defaultChannel->getBaseCurrency();
 
         $order->setCustomer($customer ?? $this->user->getCustomer());
         $order->setChannel($channel ?? $this->getDefaultChannel());
@@ -250,8 +250,7 @@ abstract class AbstractBotService
             return $product->getId() === $product->getId();
         })->first();
 
-
-        if($orderItem != null) {
+        if($orderItem === null || $orderItem === false) {
             /** @var OrderItemInterface $orderItem */
             $orderItem = $orderItemFactory->createNew();
         }

@@ -13,7 +13,6 @@ use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
-use Sylius\Component\Order\Modifier\OrderModifier;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
 use Sylius\Component\Order\Processor\OrderProcessorInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
@@ -23,7 +22,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use GuzzleHttp\Client;
 
 /**
  * Class FacebookMessengerService
@@ -52,7 +50,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         $this->setSubscriber();
 
         $payload = $this->getPayload();
-        if($payload === null || $payload === [])
+        if($payload === false || $payload === null || $payload === [])
         {
             $this->fallbackMessage();
             exit;
@@ -80,6 +78,9 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
             case "mycart":
                 $this->listItemsInCart();
                 break;
+            case "get_started":
+                $this->getStartedMessage();
+                break;
             default:
                 $this->fallbackMessage();
                 break;
@@ -93,6 +94,21 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     public function fallbackMessage(): void
     {
         $this->sendMessage($this->createButtonTemplate("Sorry i can't understand you💅", [
+            $this->createButton("List Products", "postback", \GuzzleHttp\json_encode([
+                "type" => "list_items",
+                "page" => 1
+            ])),
+            $this->createButton("Go to the website", "url", "", $this->baseUrl)
+        ]));
+    }
+
+    /**
+     * Send Get started message
+     * @throws GuzzleException
+     */
+    public function getStartedMessage(): void
+    {
+        $this->sendMessage($this->createButtonTemplate("Welcome {$this->getUser()->getFirstName()}", [
             $this->createButton("List Products", "postback", \GuzzleHttp\json_encode([
                 "type" => "list_items",
                 "page" => 1
@@ -252,20 +268,6 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
                 }, $this->order->getItems()->toArray())
             )
         );
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfiguration(): array
-    {
-        return [
-            'facebook' => [
-                'token' => getenv('FACEBOOK_PAGE_ACCESS_TOKEN'),
-                'app_secret' => getenv('FACEBOOK_APP_SECRET'),
-                'verification'=> getenv('FACEBOOK_VERIFICATION'),
-            ]
-        ];
     }
 
     /**
