@@ -1,6 +1,8 @@
 <h1 align="center">
-    <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/logo.gif" />
+    <img width="100" height="100" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/logo.png" />
+    <p>
     Sylius Bot Plugin
+    </p>
 </h1>
 
 <p align="center">First sylius messenger plugin</p>
