@@ -5,7 +5,7 @@
     </p>
 </h1>
 
-<p align="center">First sylius messenger plugin</p>
+<p align="center">Facebook messenger shopping for sylius to give your store a new shoping experience</p>
 
 <p align="center">
     <a href="https://sylius.com" target="_blank">
@@ -15,6 +15,5 @@
 
 ## Documentation
 
-For a comprehensive guide on Sylius Plugins development please go to Sylius documentation,
-there you will find the <a href="https://docs.sylius.com/en/latest/plugin-development-guide/index.html">Plugin Development Guide</a>, that is full of examples.
-
+- [Installation](https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/INSTALL.md)
+- [Contribution](https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/CUSTOMIZATION.md)
