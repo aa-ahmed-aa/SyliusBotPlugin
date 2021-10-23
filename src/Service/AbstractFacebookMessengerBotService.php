@@ -259,9 +259,9 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     /**
      * @param array $menuItems
      * @return Response
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
-    public function updatePresistentMenu($menuItems = []): Response
+    public function updatePersistentMenu($menuItems = []): Response
     {
         $body = [
             "setting_type"  =>  "call_to_actions",
@@ -349,7 +349,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function setSubscriber(): void
     {
