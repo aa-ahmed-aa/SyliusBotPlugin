@@ -1,12 +1,15 @@
+<h1 align="center">
+    <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/logo.gif" />
+    Sylius Bot Plugin
+</h1>
+
+<p align="center">First sylius messenger plugin</p>
+
 <p align="center">
     <a href="https://sylius.com" target="_blank">
         <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/demo_gif.gif" />
     </a>
 </p>
-
-<h1 align="center">Sylius Bot Plugin</h1>
-
-<p align="center">Skeleton for starting Sylius plugins.</p>
 
 ## Documentation
 
