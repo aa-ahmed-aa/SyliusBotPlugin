@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://sylius.com" target="_blank">
-        <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/require_botman/docs/resources/demo_gif.gif" />
+        <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/demo_gif.gif" />
     </a>
 </p>
 
