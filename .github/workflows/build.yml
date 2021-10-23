@@ -164,7 +164,7 @@ jobs:
 
             -
                 name: Run Psalm
-                run: vendor/bin/psalm
+                    run: vendor/bin/psalm
 
             -
                 name: Run PHPSpec

@@ -7,6 +7,7 @@ namespace Ahmedkhd\SyliusBotPlugin\Service;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
 use BotMan\Drivers\Facebook\Extensions\GenericTemplate;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use Sylius\Component\Core\Model\ChannelPricingInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
@@ -14,6 +15,7 @@ use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Core\Model\ProductVariantInterface;
 use Sylius\Component\Core\Repository\OrderItemRepositoryInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
+use Sylius\Component\Core\Repository\ProductRepositoryInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
 use Sylius\Component\Order\Processor\OrderProcessorInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
@@ -35,6 +37,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * @param ContainerInterface $container
      * @param LoggerInterface $logger
      * @param SerializerInterface $serializer
+     * @throws Exception
      */
     public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
     {
@@ -50,8 +53,9 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         $this->setRequest($request);
         $this->setSubscriber();
 
+        /** @var array $payload */
         $payload = $this->getPayload();
-        if($payload === false || $payload === null || $payload === [])
+        if(count($payload) == 0)
         {
             $this->fallbackMessage();
             exit;
@@ -125,20 +129,25 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      */
     public function listProducts($payload): void
     {
-        if($payload != null && $payload != []) {
+        /** @var ProductRepositoryInterface $productRepository */
+        $productRepository = $this->container->get('sylius.repository.product');
 
-            /**
-             * @phpstan-ignore-next-line
-             * @var Pagerfanta $productsPaginator
-             */
-            $productsPaginator = $this->container->get('sylius.repository.product')->createPaginator();
-            $productsPaginator->setCurrentPage($payload['page'] ?? 1);
-            $productsPaginator->setMaxPerPage(9);
+        /**
+         * @phpstan-ignore-next-line
+         * @var Pagerfanta $productsPaginator
+         */
+        $productsPaginator = $productRepository->createPaginator();
+        $productsPaginator->setCurrentPage((integer)$payload['page']);
+        $productsPaginator->setMaxPerPage(9);
 
-            $elements = $this->wrapProductsForListing($productsPaginator->getCurrentPageResults(), $this->defaultLocaleCode, $this->defaultChannel, $payload['page'] ?? 1);
+        $elements = $this->wrapProductsForListing(
+            $productsPaginator->getCurrentPageResults(),
+            $this->defaultLocaleCode,
+            $this->defaultChannel,
+            (integer)$payload['page']
+        );
 
-            $this->sendMessage($this->createCarosel(GenericTemplate::RATIO_SQUARE, $elements));
-        }
+        $this->sendMessage($this->createCarosel(GenericTemplate::RATIO_SQUARE, $elements));
     }
 
     /**
@@ -146,8 +155,9 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      * @param array $payload
      * @throws GuzzleException
      */
-    public function removeFromCart($payload = []): void
+    public function removeFromCart($payload): void
     {
+        /** @var integer $item_id */
         $item_id = $payload["item_id"];
         /** @var OrderModifierInterface $orderModifier */
         $orderModifier =$this->container->get('sylius.order_modifier');
@@ -162,7 +172,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
          * @phpstan-ignore-next-line
          * @var OrderItemInterface $orderItem
          */
-        $orderItem = $orderItemRepository->findOneById($item_id);
+        $orderItem = $orderItemRepository->findOneBy(["id" => $item_id]);
 
         $orderModifier->removeFromOrder($this->order, $orderItem);
 
@@ -180,11 +190,9 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
      */
     public function emptyCart(): void
     {
-        if($this->order != null) {
-            /** @var OrderRepositoryInterface $orderRepository */
-            $orderRepository = $this->container->get('sylius.repository.order');
-            $orderRepository->remove($this->order);
-        }
+        /** @var OrderRepositoryInterface $orderRepository */
+        $orderRepository = $this->container->get('sylius.repository.order');
+        $orderRepository->remove($this->order);
         $this->sendMessage(["text" => "I have removed all the items from your cart"]);
     }
 
@@ -208,7 +216,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
          * @phpstan-ignore-next-line
          * @var ProductInterface $product
          */
-        $product = $productRepository->findOneById($payload["product_id"]);
+        $product = $productRepository->findOneBy(["id" => $payload["product_id"]]);
 
         $this->createOrderItem($product);
 
@@ -273,6 +281,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
 
     /**
      * Checkout in messenger
+     * @throws GuzzleException
      */
     public function checkout(): void
     {
@@ -289,7 +298,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         $this->sendMessage(
             ButtonTemplate::create("Are you sure you want to checkout 🛒?")
                 ->addButton(ElementButton::create("Checkout")
-                    ->url(getenv("APP_URL") . $checkoutUrl)
+                    ->url($this->getEnvironment("APP_URL")  . $checkoutUrl)
                 )
                 ->addButton(ElementButton::create("Continue shopping")
                     ->type('postback')

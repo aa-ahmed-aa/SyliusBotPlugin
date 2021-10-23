@@ -7,6 +7,7 @@ namespace Ahmedkhd\SyliusBotPlugin\Controller;
 use Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService;
 use Psr\Log\LoggerInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
+use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Repository\OrderRepositoryInterface;
@@ -89,12 +90,16 @@ final class WebhookController extends AbstractController
         ChannelContextInterface $channelContext,
         string $cartToken
     ) {
-        /** @var OrderInterface $order */
+        /** @var OrderInterface|null $order */
         $order = $orderRepository->findCartByTokenValue($cartToken);
+
+        /** @var ChannelRepositoryInterface $channelRepository */
+        $channelRepository = $this->container->get('sylius.repository.channel');
 
         if($order != null)
         {
-            $channel = $this->container->get('sylius.repository.channel')->findOneById($channelContext->getChannel()->getId());
+            /** @var ChannelInterface $channel */
+            $channel = $channelRepository->findOneBy(["id" => $channelContext->getChannel()->getId()]);
             $cartStorage->setForChannel($channel, $order);
         }
 

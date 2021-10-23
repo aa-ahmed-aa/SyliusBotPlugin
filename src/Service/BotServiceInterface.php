@@ -33,9 +33,9 @@ interface BotServiceInterface
     public function getUser(): BotSubscriberInterface;
 
     /**
-     * @return Request
+     * @return Request|null
      */
-    public function getRequest(): Request;
+    public function getRequest();
 
     /**
      * @param Request $request

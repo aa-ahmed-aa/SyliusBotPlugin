@@ -41,6 +41,7 @@ class FacebookController extends AbstractController
 
     public function facebookConnect(Request $request): Response
     {
+        /** @var array $options */
         $options = $request->attributes->get('_sylius');
 
         $menuJson = [
@@ -90,6 +91,7 @@ class FacebookController extends AbstractController
         //create menu
         $this->facebookMessengerService->updatePresistentMenu($menuJson);
 
+        /** @var string $template */
         $template = $options['template'];
         return $this->render($template);
     }

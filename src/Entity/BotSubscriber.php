@@ -6,6 +6,7 @@ namespace Ahmedkhd\SyliusBotPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
 
 /**
@@ -85,6 +86,12 @@ class BotSubscriber implements BotSubscriberInterface
      */
     public $customer;
 
+    public function __construct()
+    {
+        $this->customer = new Customer();
+        $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * @return mixed

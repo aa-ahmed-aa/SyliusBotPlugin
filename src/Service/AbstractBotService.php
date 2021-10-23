@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace Ahmedkhd\SyliusBotPlugin\Service;
 
 
+use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
 use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
+use Ahmedkhd\SyliusBotPlugin\Traits\HelperTrait;
+use Exception;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Sylius\Component\Core\Model\Channel;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
+use Sylius\Component\Core\Model\Order;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductImageInterface;
@@ -28,6 +33,8 @@ use Symfony\Component\Routing\RouterInterface;
 
 abstract class AbstractBotService
 {
+    use HelperTrait;
+
     /** @var ContainerInterface */
     protected $container;
 
@@ -53,16 +60,21 @@ abstract class AbstractBotService
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
+        $this->order = new Order();
+        $this->user = new BotSubscriber();
+        $this->defaultChannel = new Channel();
+        $this->defaultLocaleCode = "en_US";
     }
 
     /**
      * @return string
+     * @throws Exception
      */
     public function getCheckoutUrl()
     {
         /** @var RouterInterface $router */
         $router = $this->container->get("router");
-        return getenv("APP_URL") .
+        return $this->getEnvironment("APP_URL") .
             $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
     }
 
@@ -117,15 +129,15 @@ abstract class AbstractBotService
 
         $imageUrl = "https://via.placeholder.com/200x200";
 
-        /** @var ProductImageInterface $image */
+        /** @var ProductImageInterface|false $image */
         $image = $product->getImagesByType('thumbnail')->first();
 
-        /** @var ProductImageInterface $image */
+        /** @var ProductImageInterface|false $image */
         $firstImage = $product->getImages()->first();
 
-        if ($image != null) {
+        if ($image !== false) {
             $imageUrl = $imagineCacheManager->getBrowserPath($image->getPath() ?? "", 'sylius_shop_product_thumbnail');
-        } else if($firstImage != null) {
+        } else if($firstImage !== false) {
             $imageUrl = $imagineCacheManager->getBrowserPath($firstImage->getPath() ?? "", 'sylius_shop_product_thumbnail');
         }
 
@@ -134,23 +146,14 @@ abstract class AbstractBotService
 
     /**
      * @param CustomerInterface|null $customer
-     * @param ChannelInterface|null $channel
-     * @param null $localeCode
      * @return OrderInterface
      */
-    protected function createCart(
-        CustomerInterface $customer = null,
-        ChannelInterface $channel = null,
-        $localeCode = null
-    ) {
+    protected function createCart(CustomerInterface $customer = null) {
         /** @var FactoryInterface $orderFactory */
         $orderFactory = $this->container->get("sylius.factory.order");
 
         /** @var OrderInterface $order */
         $order = $orderFactory->createNew();
-
-        /** @var ChannelInterface $channel */
-        $channel = $order->getChannel();
 
         /** @var UniqueIdBasedOrderTokenAssigner */
         $uniqueIdBasedOrderTokenAssigner = $this->container->get('sylius.unique_id_based_order_token_assigner');
@@ -162,8 +165,8 @@ abstract class AbstractBotService
         $baseCurrency = $this->defaultChannel->getBaseCurrency();
 
         $order->setCustomer($customer ?? $this->user->getCustomer());
-        $order->setChannel($channel ?? $this->getDefaultChannel());
-        $order->setLocaleCode($localeCode ?? $this->getDefaultLocaleCode());
+        $order->setChannel($this->getDefaultChannel());
+        $order->setLocaleCode($this->getDefaultLocaleCode());
         $order->setCurrencyCode($baseCurrency->getCode());
 
         $uniqueIdBasedOrderTokenAssigner->assignTokenValue($order);
@@ -174,7 +177,7 @@ abstract class AbstractBotService
     }
 
     /**
-     * @param array $subscriberData
+     * @param array<array-key, string> $subscriberData
      * @return Customer
      */
     public function createBotCustomerAndAssignSubscriber(array $subscriberData)
@@ -198,7 +201,7 @@ abstract class AbstractBotService
     }
 
     /**
-     * @param array $subscriberData
+     * @param array<array-key, string> $subscriberData
      * @param CustomerInterface $customer
      * @return BotSubscriberInterface
      */
@@ -244,14 +247,18 @@ abstract class AbstractBotService
         /** @var OrderItemRepositoryInterface $orderItemRepository */
         $orderItemRepository = $this->container->get("sylius.repository.order_item");
 
-        /** @var OrderItemInterface $orderItem */
+        /** @var OrderItemInterface|false $orderItem */
         $orderItem = $this->order->getItems()->filter(function(OrderItemInterface $item) use ($product): bool {
-            /** @var ProductInterface $product */
-            $product = $item->getProduct();
-            return $product->getId() === $product->getId();
+            /** @var ProductVariantInterface $itemVariant */
+            $itemVariant = $item->getVariant();
+
+            /** @var ProductVariantInterface $productVariant */
+            $productVariant = $product->getVariants()->first();
+
+            return $itemVariant->getId() === $productVariant->getId();
         })->first();
 
-        if($orderItem == null || $orderItem == false) {
+        if($orderItem === false) {
             /** @var OrderItemInterface $orderItem */
             $orderItem = $orderItemFactory->createNew();
         }

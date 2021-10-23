@@ -116,13 +116,14 @@ trait FacebookMessengerTrait
         $items = [];
         $baseCurrency = $this->getDefaultChannel()->getBaseCurrency();
 
+        /** @var array $element */
         foreach ($elements as $element)
         {
             $items[] = ReceiptElement::create($element["title"])
                 ->price((double)$element["description"])
                 ->quantity($element["quantity"])
                 ->currency($baseCurrency != null ? $baseCurrency->getCode() : "")
-                ->image($element["image"]);
+                ->image((string)$element["image"]);
         }
 
         return $items;
