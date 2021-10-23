@@ -1,11 +1,12 @@
 # Define your own admin routes here
-ahmedkhd_facebook_connect:
+ahmedkhd_facebook_persistent_menu:
   path: /bots
-  methods: [GET]
+  methods: [GET, POST]
   defaults:
     _controller: ahmedkhd_sylius_bot_plugin.controller.facebook:facebookConnect
     _sylius:
       template: "@AhmedkhdSyliusBotPlugin/Facebook/connectMessenger.html.twig"
+      form: Ahmedkhd\SyliusBotPlugin\Form\PersistentMenuFormType
 
 
 ahmedkhd_bot_subscriber:

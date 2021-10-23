@@ -4,8 +4,44 @@
 
 {% block content %}
     <div id="app">
-        <h1>Facebook</h1>
-        <facebook-connect></facebook-connect>
+        <h1>Messenger Persistent Menu</h1>
+
+        <div class="ui segment">
+            {{ form_start(form, {
+                'action': path('ahmedkhd_facebook_persistent_menu'),
+                'attr': {'class': 'ui form'}
+            }) }}
+                <div class="field">
+                    {{ form_label(form.list_products) }}
+                    {{ form_errors(form.list_products) }}
+                    {{ form_widget(form.list_products) }}
+                </div>
+                <div class="field">
+                    {{ form_label(form.order_summery) }}
+                    {{ form_errors(form.order_summery) }}
+                    {{ form_widget(form.order_summery) }}
+                </div>
+                <div class="field">
+                    {{ form_label(form.my_cart) }}
+                    {{ form_errors(form.my_cart) }}
+                    {{ form_widget(form.my_cart) }}
+                </div>
+                <div class="field">
+                    {{ form_label(form.empty_cart) }}
+                    {{ form_errors(form.empty_cart) }}
+                    {{ form_widget(form.empty_cart) }}
+                </div>
+                <div class="field">
+                    {{ form_label(form.checkout) }}
+                    {{ form_errors(form.checkout) }}
+                    {{ form_widget(form.checkout) }}
+                </div>
+                <div class="ui buttons field">
+                    <button class="ui labeled icon success button" type="submit"><i class="edit icon"></i>Update</button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+
     </div>
 
 

@@ -22,6 +22,7 @@ services:
       - '@service_container'
       - '@logger'
       - '@ahmedkhd_sylius_bot_plugin.service.facebook_messenger'
+      - '@form.factory'
 
   ahmedkhd_sylius_bot_plugin.service.facebook_messenger:
     class: Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService

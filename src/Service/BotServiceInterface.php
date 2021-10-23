@@ -68,7 +68,7 @@ interface BotServiceInterface
      * @return Response
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function updatePresistentMenu($menuItems = []): Response;
+    public function updatePersistentMenu($menuItems = []): Response;
 
     /**
      * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
