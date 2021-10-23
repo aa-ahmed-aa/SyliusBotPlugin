@@ -1,0 +1,28 @@
+
+ahmedkhd_sylius_bot_shop:
+  resource: "@AhmedkhdSyliusBotPlugin/Resources/config/shop_routing.yml"
+  prefix: /{_locale}
+  requirements:
+    _locale: ^[a-z]{2}(?:_[A-Z]{2})?$
+
+ahmedkhd_sylius_bot_admin:
+  resource: "@AhmedkhdSyliusBotPlugin/Resources/config/admin_routing.yml"
+  prefix: /admin
+
+ahmedkhd_sylius_bot_webhook_verify:
+  path: /webhook/messenger
+  methods: [GET]
+  defaults:
+    _controller: ahmedkhd_sylius_bot_plugin.controller.webhook:messengerWebhookVerification
+
+ahmedkhd_sylius_bot_webhook:
+  path: /webhook/messenger
+  methods: [POST]
+  defaults:
+    _controller: ahmedkhd_sylius_bot_plugin.controller.webhook:messengerWebhook
+
+ahmedkhd_sylius_bot_checkout:
+  path: /bot_checkout/{cartToken}
+  methods: [GET]
+  defaults:
+    _controller: ahmedkhd_sylius_bot_plugin.controller.webhook:botCheckout

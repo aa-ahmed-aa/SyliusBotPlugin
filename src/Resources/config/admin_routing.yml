@@ -1,9 +1,18 @@
 # Define your own admin routes here
-ahmedkhd_bot:
+ahmedkhd_facebook_connect:
+  path: /bots
+  methods: [GET]
+  defaults:
+    _controller: ahmedkhd_sylius_bot_plugin.controller.facebook:facebookConnect
+    _sylius:
+      template: "@AhmedkhdSyliusBotPlugin/Facebook/connectMessenger.html.twig"
+
+
+ahmedkhd_bot_subscriber:
   resource: |
-    alias: sylius_bot_plugin.bot
-    except: ['show', 'update', 'create']
+    alias: sylius_bot_plugin.bot_subscriber
+    except: ['create']
     section: admin
-    templates: "@AhmedkhdSyliusBotPlugin"
-    grid: sylius_bot_plugin
+    templates: "@SyliusAdmin\\Crud"
+    grid: sylius_bot_subscriber
   type: sylius.resource

@@ -1,39 +1,70 @@
 sylius_grid:
   grids:
-    sylius_bot_plugin:
+    sylius_bot_subscriber:
       driver:
         options:
-          class: "%sylius_bot_plugin.model.bot.class%"
+          class: "%sylius_bot_plugin.model.bot_subscriber.class%"
       fields:
-        page_name:
-          label: sylius_bot_plugin.bot.page_name
+        profile_picture:
+          label: sylius_bot_plugin.bot_subscriber.profile_picture
+          type: twig
+          options:
+            template: "@AhmedkhdSyliusBotPlugin/Ui/Image.html.twig"
+        name:
+          label: sylius_bot_plugin.bot_subscriber.name
           type: string
-        page_id:
-          label: sylius_bot_plugin.bot.page_id
+        locale:
+          label: sylius_bot_plugin.bot_subscriber.locale
           type: string
-        timezone:
-          label: sylius_bot_plugin.bot.timezone
+        gender:
+          label: sylius_bot_plugin.bot_subscriber.gender
           type: string
+        channel:
+          label: sylius_bot_plugin.bot_subscriber.channel
+          type: twig
+          options:
+            template: "@AhmedkhdSyliusBotPlugin/Ui/Channel.html.twig"
 
-#      actions:
+      actions:
 #        main:
 #          create:
 #            type: create
-#        item:
-#          update:
-#            type: update
-#          delete:
-#            type: delete
-#        bulk:
-#          delete:
-#            type: delete
+        item:
+          update:
+            type: update
+          delete:
+            type: delete
+        bulk:
+          delete:
+            type: delete
       filters:
-        page_name:
-          label: sylius_bot_plugin.bot.page_name
+        name:
+          label: sylius_bot_plugin.bot_subscriber.name
           type: string
-        page_id:
-          label: sylius_bot_plugin.bot.page_id
+        first_name:
+          label: sylius_bot_plugin.bot_subscriber.first_name
+          type: string
+        last_name:
+          label: sylius_bot_plugin.bot_subscriber.last_name
+          type: string
+        locale:
+          label: sylius_bot_plugin.bot_subscriber.locale
           type: string
         timezone:
-          label: sylius_bot_plugin.bot.timezone
+          label: sylius_bot_plugin.bot_subscriber.timezone
           type: string
+        gender:
+          label: sylius_bot_plugin.bot_subscriber.gender
+          type: select
+          form_options:
+            choices:
+              sylius_bot_plugin.bot_subscriber.male: male
+              sylius_bot_plugin.bot_subscriber.female: female
+        channel:
+          label: sylius_bot_plugin.bot_subscriber.channel
+          type: select
+          form_options:
+            choices:
+              sylius_bot_plugin.bot_subscriber.messenger: Messenger
+              sylius_bot_plugin.bot_subscriber.telegram: Telegram
+

@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Ahmedkhd\SyliusBotPlugin\Entity;
 
@@ -41,7 +42,7 @@ interface BotInterface extends ResourceInterface
     /**
      * @return mixed
      */
-    public function getPaigeAccessToken();
+    public function getPageAccessToken();
 
     /**
      * @param string $page_image_url

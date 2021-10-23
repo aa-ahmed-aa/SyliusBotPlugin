@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Ahmedkhd\SyliusBotPlugin\Entity;
 
@@ -32,7 +33,7 @@ class Bot implements BotInterface
      * @var string | null
      * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
      */
-    protected $paige_access_token;
+    protected $page_access_token;
 
     /**
      * @var string | null
@@ -105,19 +106,19 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param string $paige_access_token
+     * @param string $page_access_token
      */
-    public function setPaigeAccessToken(string $paige_access_token): void
+    public function setPaigeAccessToken(string $page_access_token): void
     {
-        $this->paige_access_token = $paige_access_token;
+        $this->page_access_token = $page_access_token;
     }
 
     /**
      * @return mixed
      */
-    public function getPaigeAccessToken()
+    public function getPageAccessToken()
     {
-        return $this->paige_access_token;
+        return $this->page_access_token;
     }
 
     /**
