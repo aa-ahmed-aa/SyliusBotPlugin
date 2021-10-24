@@ -8,9 +8,9 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3",
+        "php": "^7.4 || ^8.0",
+        "sylius/sylius": "~1.9.0 || ~1.10.0@beta",
         "botman/driver-facebook": "^1.11",
-        "sylius/sylius": "~1.8.0 || ~1.9.0",
         "symfony/webpack-encore-bundle": "^1.11",
       "ext-json": "*"
     },
