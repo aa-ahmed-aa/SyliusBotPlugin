@@ -13,7 +13,6 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
-use phpDocumentor\Reflection\Types\Mixed_;
 use Psr\Http\Message\ResponseInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Core\Model\ChannelPricingInterface;
@@ -32,7 +31,6 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use function PHPUnit\Framework\assertIsArray;
 
 abstract class AbstractFacebookMessengerBotService extends AbstractBotService implements BotServiceInterface
 {
@@ -260,6 +258,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
      * @param array $menuItems
      * @return Response
      * @throws GuzzleException
+     * @throws Exception
      */
     public function updatePersistentMenu($menuItems = []): Response
     {
@@ -270,6 +269,29 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
         ];
         $this->sendFacebookRequest(
             "/v2.8/me/thread_settings?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
+            $body,
+            Request::METHOD_POST
+        );
+
+        return new Response("Done");
+    }
+
+    /**
+     * @return Response
+     * @throws GuzzleException
+     * @throws Exception
+     */
+    public function setGetStartedButtonPayload(): Response
+    {
+        $body = [
+            "get_started"  =>  [
+                "payload" => \GuzzleHttp\json_encode([
+                    "type" => "get_started"
+                ])
+            ]
+        ];
+        $this->sendFacebookRequest(
+            "/v2.8/me/messenger_profile?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
             $body,
             Request::METHOD_POST
         );

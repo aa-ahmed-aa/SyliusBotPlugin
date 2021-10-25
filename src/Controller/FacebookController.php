@@ -114,6 +114,7 @@ class FacebookController extends AbstractController
             ];
 
             try {
+                $this->facebookMessengerService->setGetStartedButtonPayload();
                 $this->facebookMessengerService->updatePersistentMenu($menuJson);
             } catch (GuzzleException $e) {
                 $this->logger->critical($e->getMessage());
