@@ -14,8 +14,8 @@
 </p>
 
 ## Screenshots
-<img width="800" height="600" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/screen_1.png">
-<img width="800" height="600" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/screen_2.png">
+![Screenshot](docs/resources/screen_1.png)
+![Screenshot](docs/resources/screen_2.png)
 
 ## Pre-installation
 - [create facebook app](https://developers.facebook.com/docs/messenger-platform/getting-started/app-setup)
