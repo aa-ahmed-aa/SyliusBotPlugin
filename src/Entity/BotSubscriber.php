@@ -150,17 +150,17 @@ class BotSubscriber implements BotSubscriberInterface
     }
 
     /**
-     * @param string|null $timezone
+     * @param mixed|null $timezone
      */
-    public function setTimezone(?string $timezone): void
+    public function setTimezone($timezone): void
     {
-        $this->timezone = $timezone;
+        $this->timezone = (string)$timezone;
     }
 
     /**
-     * @return string|null
+     * @return mixed|null
      */
-    public function getTimezone(): ?string
+    public function getTimezone()
     {
         return $this->timezone;
     }

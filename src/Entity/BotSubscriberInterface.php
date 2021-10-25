@@ -46,14 +46,14 @@ interface BotSubscriberInterface extends ResourceInterface
     public function getLastName(): ?string;
 
     /**
-     * @param string|null $timezone
+     * @param mixed|null $timezone
      */
-    public function setTimezone(?string $timezone): void;
+    public function setTimezone($timezone): void;
 
     /**
-     * @return string|null
+     * @return mixed|null
      */
-    public function getTimezone(): ?string;
+    public function getTimezone();
 
     /**
      * @param string|null $profilePicture

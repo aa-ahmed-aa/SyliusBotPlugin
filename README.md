@@ -14,6 +14,8 @@
 </p>
 
 ## Screenshots
+<img width="800" height="600" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/screen_1.png">
+<img width="800" height="600" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/screen_2.png">
 
 ## Pre-installation
 - [create facebook app](https://developers.facebook.com/docs/messenger-platform/getting-started/app-setup)
@@ -59,7 +61,11 @@
     Verify Token : SYLIUSVERIFY
     ```
 
-8. Open your page and start talking to you bot 
+8. login to sylius admin dashboard and got to `Messenger` tab and click on update
+    - in this step your presistent menu and get started button yould be updated on the facebook page
+    - make sure the persistent menu criteria is fulfilled [here](https://developers.facebook.com/docs/messenger-platform/send-messages/persistent-menu/#set_menu)
+
+9. Open your page and start talking to you bot 
 
 
 

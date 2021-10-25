@@ -178,9 +178,9 @@ abstract class AbstractBotService
 
     /**
      * @param array<array-key, string> $subscriberData
-     * @return Customer
+     * @return CustomerInterface
      */
-    public function createBotCustomerAndAssignSubscriber(array $subscriberData)
+    public function createBotCustomerAndAssignSubscriber(array $subscriberData): CustomerInterface
     {
         /** @var FactoryInterface $customerFactory */
         $customerFactory = $this->container->get("sylius.factory.customer");
@@ -188,8 +188,14 @@ abstract class AbstractBotService
         /** @var CustomerRepositoryInterface $customerRepository */
         $customerRepository = $this->container->get("sylius.repository.customer");
 
-        /** @var Customer $customer */
-        $customer = $customerFactory->createNew();
+        /** @var CustomerInterface|false $customer */
+        $customer = $customerRepository->findOneBy(["email" => "{$subscriberData["id"]}@messenger.com"]);
+
+        if($customer === false){
+            /** @var CustomerInterface $customer */
+            $customer = $customerFactory->createNew();
+        }
+
         $customer->setFirstName($subscriberData["first_name"]);
         $customer->setLastName($subscriberData["last_name"]);
         $customer->setGender($subscriberData["gender"] === "male" ? CustomerInterface::MALE_GENDER : ($subscriberData["gender"] === "female" ? CustomerInterface::FEMALE_GENDER : CustomerInterface::UNKNOWN_GENDER));
