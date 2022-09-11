@@ -48,7 +48,11 @@
         "vimeo/psalm": "4.4.1"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/thanks": true,
+            "phpstan/extension-installer": true
+        }
     },
     "extra": {
         "branch-alias": {

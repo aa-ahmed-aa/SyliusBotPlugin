@@ -1,4 +1,18 @@
 ## Contribution
+### Requirements
+  - symfony cli
+  - php
+  - composer
+  - yarn
+  - mysql
+
+### Setup environemnt
+1. edit `tests/Application/.env` to have the correct env variables. ![basic .env](https://github.com/Sylius/PluginSkeleton/blob/1.12/tests/Application/.env) + ![plugin based .env](https://github.com/Sylius/PluginSkeleton/blob/1.12/tests/Application/.env)
+2. exec `bin/console sylius:install --no-interaction` follow the guide to fix any issue(timezone enabled plugins, etc).
+3. exec `bin/console doctrine:schema:update`
+4. exec `bin/console sylius:fixtures:load`
+5. exec `symfony server:start --port=9090` and open `http:localhost:9090` 
+6. exec `ngrok http 9090` and update the `APP_URL` in .env with the https link.
 ### Running plugin tests
 
   - PHPUnit
@@ -62,18 +76,3 @@
     vendor/bin/ecs check src
     ```
 
-### Opening Sylius with your plugin
-
-- Using `test` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=test bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=test bin/console symfony server:start)
-    ```
-    
-- Using `dev` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=dev bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=dev symfony server:start)
-    ```
