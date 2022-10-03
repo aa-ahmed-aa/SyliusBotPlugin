@@ -61,8 +61,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Ahmedkhd\\SyliusBotPlugin\\": "src/",
-            "Tests\\Ahmedkhd\\SyliusBotPlugin\\": "tests/"
+            "SyliusBotPlugin\\": "src/",
+            "Tests\\SyliusBotPlugin\\": "tests/"
         }
     },
     "autoload-dev": {

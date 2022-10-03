@@ -2,7 +2,7 @@ sylius_resource:
   resources:
     sylius_bot_plugin.bot:
       classes:
-        model: Ahmedkhd\SyliusBotPlugin\Entity\Bot
+        model: SyliusBotPlugin\Entity\Bot
     sylius_bot_plugin.bot_subscriber:
       classes:
-        model: Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber
+        model: SyliusBotPlugin\Entity\BotSubscriber

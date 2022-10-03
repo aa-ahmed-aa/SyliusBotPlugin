@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
 
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriber;
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
-use Ahmedkhd\SyliusBotPlugin\Traits\HelperTrait;
+use SyliusBotPlugin\Entity\BotSubscriber;
+use SyliusBotPlugin\Entity\BotSubscriberInterface;
+use SyliusBotPlugin\Traits\HelperTrait;
 use Exception;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Sylius\Component\Core\Model\Channel;
@@ -31,12 +31,9 @@ use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
-abstract class AbstractBotService
+abstract class AbstractBotService extends AbstractService
 {
     use HelperTrait;
-
-    /** @var ContainerInterface */
-    protected $container;
 
     /** @var OrderInterface */
     protected $order;
@@ -59,7 +56,7 @@ abstract class AbstractBotService
      */
     public function __construct(ContainerInterface $container)
     {
-        $this->container = $container;
+        parent::__construct($container);
         $this->order = new Order();
         $this->user = new BotSubscriber();
         $this->defaultChannel = new Channel();
@@ -75,7 +72,7 @@ abstract class AbstractBotService
         /** @var RouterInterface $router */
         $router = $this->container->get("router");
         return $this->getEnvironment("APP_URL") .
-            $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+            $router->generate("sylius_bot_plugin_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
     }
 
     /**
@@ -191,7 +188,7 @@ abstract class AbstractBotService
         /** @var CustomerInterface|false $customer */
         $customer = $customerRepository->findOneBy(["email" => "{$subscriberData["id"]}@messenger.com"]);
 
-        if($customer === false){
+        if($customer === false || $customer === null) {
             /** @var CustomerInterface $customer */
             $customer = $customerFactory->createNew();
         }

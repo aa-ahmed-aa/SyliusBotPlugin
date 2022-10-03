@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
@@ -28,7 +28,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class FacebookMessengerService
- * @package Ahmedkhd\SyliusBotPlugin\Service
+ * @package SyliusBotPlugin\Service
  */
 class FacebookMessengerService extends AbstractFacebookMessengerBotService
 {
@@ -293,7 +293,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         /** @var RouterInterface $router */
         $router = $this->container->get("router");
 
-        $checkoutUrl = $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+        $checkoutUrl = $router->generate("sylius_bot_plugin_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
 
         $this->sendMessage(
             ButtonTemplate::create("Are you sure you want to checkout 🛒?")

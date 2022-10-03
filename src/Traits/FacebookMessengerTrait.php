@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Traits;
+namespace SyliusBotPlugin\Traits;
 
 
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;

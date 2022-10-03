@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Controller;
+namespace SyliusBotPlugin\Controller;
 
 
-use Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService;
+use SyliusBotPlugin\Entity\Bot;
+use SyliusBotPlugin\Service\FacebookMessengerService;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -60,66 +61,30 @@ class FacebookController extends AbstractController
         /** @var string $formType */
         $formType = $options["form"];
 
-        /** @var array $data */
-        $data = [
-            "list_products" => "List products",
-            "order_summery" => "Order summery",
-            "my_cart" => "My cart",
-            "empty_cart" => "Empty cart",
-            "checkout" => "Checkout",
-        ];
-        $form = $this->formFactory->createNamed('', $formType, $data);
+        $botService = $this->container->get("sylius_bot_plugin.service.bot_configuration");
+
+        /** @var Bot $botConfiguration */
+        $botConfiguration = $botService->getPersistentMenuWithDefaults();
+
+        /** @var array $persistentMenu */
+        $persistentMenu = json_decode($botConfiguration->getPersistentMenu());
+
+        $form = $this->formFactory->createNamed('', $formType, $persistentMenu);
 
         if ($request->isMethod("POST") && $form->handleRequest($request)->isValid()) {
             /** @var array $persistentMenu */
             $persistentMenu = $form->getData();
 
-            $menuJson = [
-                [
-                    "type" => "postback",
-                    "title" => $persistentMenu["list_products"],
-                    "payload" => \GuzzleHttp\json_encode([
-                        "type" => "list_items",
-                        "page" => 1
-                    ])
-                ],
-                [
-                    "type" => "postback",
-                    "title" => $persistentMenu["order_summery"],
-                    "payload" => \GuzzleHttp\json_encode([
-                        "type" => "order_summery"
-                    ])
-                ],
-                [
-                    "type" => "postback",
-                    "title" => $persistentMenu["my_cart"],
-                    "payload" => \GuzzleHttp\json_encode([
-                        "type" => "mycart"
-                    ])
-                ],
-                [
-                    "type" => "postback",
-                    "title" => $persistentMenu["empty_cart"],
-                    "payload" => \GuzzleHttp\json_encode([
-                        "type" => "empty_cart"
-                    ])
-                ],
-                [
-                    "type" => "postback",
-                    "title" => $persistentMenu["checkout"],
-                    "payload" => \GuzzleHttp\json_encode([
-                        "type" => "checkout"
-                    ])
-                ]
-            ];
-
             try {
-                $this->facebookMessengerService->setGetStartedButtonPayload();
-                $this->facebookMessengerService->updatePersistentMenu($menuJson);
+                $botConfiguration->setPersistentMenu(json_encode($persistentMenu));
+//                dd($botConfiguration);
+                $bot = $botService->add($botConfiguration);
+//                $this->facebookMessengerService->setGetStartedButtonPayload();
+//                $this->facebookMessengerService->updatePersistentMenu($menuJson);
             } catch (GuzzleException $e) {
                 $this->logger->critical($e->getMessage());
             }
-            return $this->redirectToRoute("ahmedkhd_facebook_persistent_menu");
+            return $this->redirectToRoute("sylius_bot_plugin_facebook_persistent_menu");
         }
 
         return $this->render($template, ['form' => $form->createView()]);

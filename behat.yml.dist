@@ -46,7 +46,7 @@ default:
         FriendsOfBehat\SymfonyExtension:
             bootstrap: tests/Application/config/bootstrap.php
             kernel:
-                class: Tests\Ahmedkhd\SyliusBotPlugin\Application\Kernel
+                class: Tests\SyliusBotPlugin\Application\Kernel
 
         FriendsOfBehat\VariadicExtension: ~
 

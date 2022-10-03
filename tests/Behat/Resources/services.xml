@@ -5,12 +5,12 @@
         <defaults public="true" />
         <!-- Put your Behat services here -->
 
-<!--        <service id="ahmedkhd_sylius_example.context.ui.shop.welcome" class="Tests\Ahmedkhd\SyliusBotPlugin\Behat\Context\Ui\Shop\WelcomeContext">-->
-<!--            <argument type="service" id="ahmedkhd_sylius_example.page.shop.static_welcome" />-->
-<!--            <argument type="service" id="ahmedkhd_sylius_example.page.shop.dynamic_welcome" />-->
+<!--        <service id="sylius_bot_plugin_sylius_example.context.ui.shop.welcome" class="Tests\SyliusBotPlugin\Behat\Context\Ui\Shop\WelcomeContext">-->
+<!--            <argument type="service" id="sylius_bot_plugin_sylius_example.page.shop.static_welcome" />-->
+<!--            <argument type="service" id="sylius_bot_plugin_sylius_example.page.shop.dynamic_welcome" />-->
 <!--        </service>-->
 
-<!--        <service id="ahmedkhd_sylius_example.page.shop.static_welcome" class="Tests\Ahmedkhd\SyliusBotPlugin\Behat\Page\Shop\StaticWelcomePage" parent="sylius.behat.symfony_page" public="false" />-->
-<!--        <service id="ahmedkhd_sylius_example.page.shop.dynamic_welcome" class="Tests\Ahmedkhd\SyliusBotPlugin\Behat\Page\Shop\DynamicWelcomePage" parent="sylius.behat.symfony_page" public="false" />-->
+<!--        <service id="sylius_bot_plugin_sylius_example.page.shop.static_welcome" class="Tests\SyliusBotPlugin\Behat\Page\Shop\StaticWelcomePage" parent="sylius.behat.symfony_page" public="false" />-->
+<!--        <service id="sylius_bot_plugin_sylius_example.page.shop.dynamic_welcome" class="Tests\SyliusBotPlugin\Behat\Page\Shop\DynamicWelcomePage" parent="sylius.behat.symfony_page" public="false" />-->
     </services>
 </container>

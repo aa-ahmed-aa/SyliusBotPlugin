@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
 
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
+use SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;

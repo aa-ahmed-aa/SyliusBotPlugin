@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Menu;
+namespace SyliusBotPlugin\Menu;
 
 
 use Sylius\Bundle\UiBundle\Menu\Event\MenuBuilderEvent;
@@ -17,7 +17,7 @@ final class MenuBuilderListener
         $menu = $event->getMenu();
 
         $bots = $menu->addChild('Bots');
-        $bots->addChild('messenger', ['route' => 'ahmedkhd_facebook_persistent_menu'])
+        $bots->addChild('messenger', ['route' => 'sylius_bot_plugin_facebook_persistent_menu'])
             ->setLabel('Messenger')
             ->setLabelAttribute('icon', 'facebook')
         ;

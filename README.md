@@ -41,14 +41,14 @@
     ```yml
     imports:
         # ...
-        - { resource: '@AhmedkhdSyliusBotPlugin/Resources/config/app/config.yml' }
+        - { resource: '@SyliusBotPlugin/Resources/config/app/config.yml' }
     
     ```
 
 4. Import routes inside your routes.yml
     ```yml
-    ahmedkhd_sylius_bot:
-        resource: "@AhmedkhdSyliusBotPlugin/Resources/config/routes.yml"
+    sylius_bot_plugin_sylius_bot:
+        resource: "@SyliusBotPlugin/Resources/config/routes.yml"
     ```
 
 5. Run `php bin/console doctrine:schema:update --force`

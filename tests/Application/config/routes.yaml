@@ -1,2 +1,2 @@
-ahmedkhd_sylius_bot:
-    resource: "@AhmedkhdSyliusBotPlugin/Resources/config/routes.yml"
+sylius_bot_plugin_sylius_bot:
+    resource: "@SyliusBotPlugin/Resources/config/routes.yml"

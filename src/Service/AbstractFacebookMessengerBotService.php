@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
-use Ahmedkhd\SyliusBotPlugin\Traits\FacebookMessengerTrait;
+use SyliusBotPlugin\Entity\BotSubscriberInterface;
+use SyliusBotPlugin\Traits\FacebookMessengerTrait;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;
@@ -263,12 +263,11 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     public function updatePersistentMenu($menuItems = []): Response
     {
         $body = [
-            "setting_type"  =>  "call_to_actions",
-            "thread_state"  =>  "existing_thread",
+            "psid"  =>  $menuItems["psid"],
             "call_to_actions" => $menuItems
         ];
         $this->sendFacebookRequest(
-            "/v2.8/me/thread_settings?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
+            "/".getenv("FACEBOOK_GRAPH_VERSION")."/me/custom_user_settings?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
             $body,
             Request::METHOD_POST
         );

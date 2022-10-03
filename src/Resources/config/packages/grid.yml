@@ -9,7 +9,7 @@ sylius_grid:
           label: sylius_bot_plugin.bot_subscriber.profile_picture
           type: twig
           options:
-            template: "@AhmedkhdSyliusBotPlugin/Ui/Image.html.twig"
+            template: "@SyliusBotPlugin/Ui/Image.html.twig"
         name:
           label: sylius_bot_plugin.bot_subscriber.name
           type: string
@@ -23,7 +23,7 @@ sylius_grid:
           label: sylius_bot_plugin.bot_subscriber.channel
           type: twig
           options:
-            template: "@AhmedkhdSyliusBotPlugin/Ui/Channel.html.twig"
+            template: "@SyliusBotPlugin/Ui/Channel.html.twig"
 
       actions:
 #        main:

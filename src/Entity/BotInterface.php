@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Entity;
+namespace SyliusBotPlugin\Entity;
 
 
 use Sylius\Component\Resource\Model\ResourceInterface;
