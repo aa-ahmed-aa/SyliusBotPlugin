@@ -49,7 +49,7 @@ class Bot implements BotInterface
 
     /**
      * @var string | null
-     * @ORM\Column(name="page_image_url", type="string", length=255, nullable=true)
+     * @ORM\Column(name="page_image_url", type="text", nullable=true)
      */
     protected $page_image_url;
 
@@ -129,7 +129,7 @@ class Bot implements BotInterface
     /**
      * @param string $page_access_token
      */
-    public function setPaigeAccessToken(string $page_access_token): void
+    public function setPageAccessToken(string $page_access_token): void
     {
         $this->page_access_token = $page_access_token;
     }

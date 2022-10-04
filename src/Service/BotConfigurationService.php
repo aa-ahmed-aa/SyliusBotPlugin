@@ -2,14 +2,27 @@
 
 namespace SyliusBotPlugin\Service;
 
+use Psr\Log\LoggerInterface;
 use SyliusBotPlugin\Entity\Bot;
 use Sylius\Component\Resource\Factory\FactoryInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
-class BotConfigurationService extends AbstractService
+class BotConfigurationService extends AbstractFacebookMessengerBotService
 {
+    /**
+     * FacebookMessengerService constructor.
+     * @param ContainerInterface $container
+     * @param LoggerInterface $logger
+     * @param SerializerInterface $serializer
+     */
+    public function __construct(ContainerInterface $container,LoggerInterface $logger, SerializerInterface $serializer)
+    {
+        parent::__construct($container, $logger, $serializer);
+    }
+
     /**
      * @return mixed
      */

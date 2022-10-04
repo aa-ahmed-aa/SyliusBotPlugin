@@ -1,12 +1,22 @@
 {% extends '@SyliusAdmin/layout.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {% include '@SyliusUi/_stylesheets.html.twig' with {'path': 'bundles/syliusbotplugin/css/facebook_connect.css'} %}
+{% endblock %}
+
 {% block title %}{{ 'sylius.message.title'|trans }} | {{ 'sylius.config.title'|trans }} {{ parent() }}{% endblock %}
 
 {% block content %}
     <div id="app">
         <h1 class="ui header">Bot Settings</h1>
 
-        <div class="ui segment listitem block">
+        <div class="tab">
+            <button class="tablinks" onclick="openTab(event, 'facebook_connect')" id="defaultOpen">Connect Facebook</button>
+            <button class="tablinks" onclick="openTab(event, 'persistent_menu')">Persistent Menu</button>
+        </div>
+
+        <div id="facebook_connect" class="ui segment listitem block tabcontent active">
             <h1 class="ui header left" style="float: left;">Connect Facebook Page</h1>
             <div style="float: right;" class="right aligned">
                 <div id="status"></div>
@@ -22,22 +32,22 @@
             <br>
             <br>
             <br>
-            <br>
+
+            <h3 style="text-align: center" id="no_page_found">No pages found please login to Facebook</h3>
 
             <table class="ui celled border-radius table">
                 <tbody id="pages">
-                    <div id="loader" style="display: none;" class="ui segment">
-                        <p></p>
-                        <div class="ui active dimmer">
-                            <div class="ui loader"></div>
-                        </div>
+                <div id="loader" style="display: none;" class="ui segment">
+                    <p></p>
+                    <div class="ui active inverted dimmer">
+                        <div class="ui text loader">loading</div>
                     </div>
-
-                    <h1 style="text-align: center" id="no_page_found">No Pages Found</h1>
+                </div>
                 </tbody>
             </table>
         </div>
-        <div class="ui segment">
+
+        <div id="persistent_menu" class="ui segment tabcontent">
             <h1>Bot Persistent Menu</h1>
             {{ form_start(form, {
                 'action': path('sylius_bot_plugin_facebook_persistent_menu'),
@@ -81,6 +91,8 @@
 {% endblock %}
 
 {% block javascripts %}
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
 <script src="https://connect.facebook.net/en_US/sdk.js"></script>
-<script src="{{ asset('bundles/syliusbotplugin/greeting.js') }}"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/facebook_connect.js') }}"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/tabs.js') }}"></script>
 {% endblock %}

@@ -37,7 +37,7 @@ interface BotInterface extends ResourceInterface
     /**
      * @param string $paige_access_token
      */
-    public function setPaigeAccessToken(string $paige_access_token): void;
+    public function setPageAccessToken(string $paige_access_token): void;
 
     /**
      * @return mixed

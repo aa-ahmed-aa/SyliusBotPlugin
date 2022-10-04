@@ -5,12 +5,15 @@ const FACEBOOK_GRAPH_VERSION = document.getElementById('FACEBOOK_GRAPH_VERSION')
 let pageDomTemplate = `
 <tr id="block">
     <td>
-        <img class="ui avatar image mini page_image" id="page_image" src="PAGE_IMAGE_URL" />
+        <img class="ui avatar image mini page_image" id="page_image" src="PAGE_IMAGE_URL" onerror="this.onerror=null; this.src='/assets/shop/img/logo.png'" />
         <input style="display: none;" id="page_id" value="PAGE_ID"/>
         <span style="padding-left: 10px; font-size: large;" id="page_title"> PAGE_TITLE </span>
     </td>
     <td style="text-align: center">Connected</td>
-    <td><button class="ui green button fluid">Conect</button></td>
+    <td>
+        <button class="ui green button fluid" id="connect">Conect</button>
+        <button class="ui red button fluid" style="display: none" id="disconnect">Disonect</button>
+    </td>
 </tr>
 `;
 
@@ -27,8 +30,7 @@ function logIn() {
     FB.login(function(response) {
         if (response.status === 'connected') {
             const user = response.authResponse;
-
-            getUserPages(user.userID, user.accessToken);
+            location.reload();
         } else {
             console.log('not logged in', response);
         }
@@ -114,15 +116,43 @@ async function getPagePictureURL(page) {
     return (await sendFacebookRequest(`/${page.id}/picture?redirect=0&access_token=${page.access_token}`)).data.url;
 }
 
-async function sendFacebookRequest(path, method = "GET", body = null, headers = { "Content-type": "application/json;" }) {
+async function sendFacebookRequest(path, method = "GET", body = null, headers = {}) {
+    return await sendRequest(path.startsWith('http') ? path : `${FACEBOOK_GRAPH_URL}${path}`, method, body, headers);
+}
+
+async function sendRequest(url, method = "GET", body = null, headers = {}) {
     try {
-        const url = path.startsWith('http') ? path : `${FACEBOOK_GRAPH_URL}${path}`;
-        return await (await fetch(url, {
+        const options = {
             method,
-            headers,
+            headers: {
+                "Content-type": "application/json;",
+                ...headers
+            },
             mode: 'cors',
-        })).json();
+        }
+        if(body !== null) {
+            options.body = JSON.stringify(body);
+        }
+        return await (await fetch(url, options)).json();
     } catch (e) {
         console.log('Error happened while sending request', e.message);
     }
+}
+
+document.addEventListener('click', async event => {
+    if( event.target.id === 'connect' ) {
+        const pageId = event.target.parentNode.parentNode.querySelector('#page_id').value;
+        const page = getPageById(pageId);
+
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        console.log(data);
+
+        console.log()
+        // const response = await sendRequest('/admin/bots/connect', 'POST', page);
+        // console.log('aaaaaaaaaaaaaa', response);
+    }
+});
+
+function getPageById(pageId) {
+    return userPages.find(item => item.id === pageId );
 }
