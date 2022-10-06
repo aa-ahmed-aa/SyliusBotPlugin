@@ -12,19 +12,19 @@
         <h1 class="ui header">Bot Settings</h1>
 
         <div class="tab">
-            <button class="tablinks" onclick="openTab(event, 'facebook_connect')" id="defaultOpen">Connect Facebook</button>
-            <button class="tablinks" onclick="openTab(event, 'persistent_menu')">Persistent Menu</button>
+            <button class="tablinks facebook_connect" onclick="openTab(event, 'facebook_connect')" id="defaultOpen">Connect Facebook</button>
+            <button class="tablinks persistent_menu" onclick="openTab(event, 'persistent_menu')">Persistent Menu</button>
         </div>
 
         <div id="facebook_connect" class="ui segment listitem block tabcontent active">
             <h1 class="ui header left" style="float: left;">Connect Facebook Page</h1>
             <div style="float: right;" class="right aligned">
                 <div id="status"></div>
-                <button class="big ui facebook button" id="connect" onclick="logIn()">
+                <button class="big ui facebook button" id="facebook_login" onclick="logIn()">
                     <i class="facebook icon"></i>
                     Facebook Login
                 </button>
-                <button class="big ui red button" id="disconnect" onclick="logout()">
+                <button class="big ui red button" id="facebook_logout" onclick="logout()">
                     <i class="sign-out icon"></i>
                     Logout
                 </button>
@@ -53,6 +53,11 @@
                 'action': path('sylius_bot_plugin_facebook_persistent_menu'),
                 'attr': {'class': 'ui form'}
             }) }}
+            <div class="field">
+                {{ form_label(form.page) }}
+                {{ form_errors(form.page) }}
+                {{ form_widget(form.page) }}
+            </div>
             <div class="field">
                 {{ form_label(form.list_products) }}
                 {{ form_errors(form.list_products) }}
@@ -95,4 +100,5 @@
 <script src="https://connect.facebook.net/en_US/sdk.js"></script>
 <script src="{{ asset('bundles/syliusbotplugin/js/facebook_connect.js') }}"></script>
 <script src="{{ asset('bundles/syliusbotplugin/js/tabs.js') }}"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/persistent_menu.js') }}"></script>
 {% endblock %}

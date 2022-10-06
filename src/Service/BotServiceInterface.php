@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Service;
 
-
 use SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
@@ -100,4 +99,6 @@ interface BotServiceInterface
      * Set Current Active Bot Order
      */
     public function setCurrentActiveOrder(): void;
+
+
 }

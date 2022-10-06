@@ -3,16 +3,28 @@ sylius_bot_plugin_facebook_persistent_menu:
   path: /bots
   methods: [GET, POST]
   defaults:
-    _controller: sylius_bot_plugin.controller.facebook:facebookHome
+    _controller: sylius_bot_plugin.controller.facebook:updatePersistentMenu
     _sylius:
       template: "@SyliusBotPlugin/Facebook/connectMessenger.html.twig"
       form: SyliusBotPlugin\Form\PersistentMenuFormType
 
 sylius_bot_plugin_facebook_connect_page:
-  path: /bots/connect
+  path: /bots/{action}
   methods: [POST]
   defaults:
-    _controller: sylius_bot_plugin.controller.facebook:facebookConnectPage
+    _controller: sylius_bot_plugin.controller.facebook:connectPage
+
+sylius_bot_plugin_facebook_get_persistent_menu:
+  path: /persistent_menu/{page_id}
+  methods: [GET]
+  defaults:
+    _controller: sylius_bot_plugin.controller.facebook:getPagePersistentMenu
+
+sylius_bot_plugin_facebook_get_connected_pages:
+  path: /connected_pages
+  methods: [GET]
+  defaults:
+    _controller: sylius_bot_plugin.controller.facebook:connectedPages
 
 sylius_bot_plugin_bot_subscriber:
   resource: |

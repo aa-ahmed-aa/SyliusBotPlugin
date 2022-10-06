@@ -7,6 +7,7 @@ use SyliusBotPlugin\Entity\Bot;
 use Sylius\Component\Resource\Factory\FactoryInterface;
 use Sylius\Component\Resource\Model\ResourceInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
+use SyliusBotPlugin\Entity\BotInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -106,33 +107,40 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
     }
 
     /**
-     * @param int|null $botId
-     * @return ResourceInterface
+     * @param Bot | null $bot
+     * @return string
      */
-    public function getPersistentMenuWithDefaults(int $botId = null): ResourceInterface
+    public function getPersistentMenuWithDefaults(Bot $bot = null): string
     {
-        /** @var Bot $botConfig */
-        $botConfig = $this->getBotConfiguration($botId);
+        if ($bot === null) {
+            /** @var BotInterface $bot */
+            $bot = $this->getBotRepository()->findOneBy([]);
+            if ($bot === null) {
+                return '';
+            }
+        }
 
-        $persistentMenuJson = $botConfig->getPersistentMenu();
+        $persistentMenuJson = $bot->getPersistentMenu();
 
         /** @var array $botConfigPersistentMenu */
-        $botConfigPersistentMenu = json_decode($persistentMenuJson);
+        $botConfigPersistentMenu = json_decode($persistentMenuJson, true);
 
         /** @var array $defaultPersistentMenu */
         $defaultPersistentMenu = Bot::PERSISTENT_MENU_FALLBACK;
 
         $persistentMenuJson = [
             "list_products" => $botConfigPersistentMenu['list_products'] ?? $defaultPersistentMenu['list_products'],
-            "order_summery" => $botConfigPersistentMenu['order_summery'] ?? $defaultPersistentMenu['list_products'],
-            "my_cart" => $botConfigPersistentMenu['my_cart'] ?? $defaultPersistentMenu['list_products'],
-            "empty_cart" => $botConfigPersistentMenu['empty_cart'] ?? $defaultPersistentMenu['list_products'],
-            "checkout" => $botConfigPersistentMenu['checkout'] ?? $defaultPersistentMenu['list_products'],
+            "order_summery" => $botConfigPersistentMenu['order_summery'] ?? $defaultPersistentMenu['order_summery'],
+            "my_cart" => $botConfigPersistentMenu['my_cart'] ?? $defaultPersistentMenu['my_cart'],
+            "empty_cart" => $botConfigPersistentMenu['empty_cart'] ?? $defaultPersistentMenu['empty_cart'],
+            "checkout" => $botConfigPersistentMenu['checkout'] ?? $defaultPersistentMenu['checkout'],
+            "bot_id" => $bot->getId(),
+            "facebook_page" => $bot->getPageId(),
         ];
 
-        $botConfig->setPersistentMenu(\GuzzleHttp\json_encode($persistentMenuJson));
+        $bot->setPersistentMenu(\GuzzleHttp\json_encode($persistentMenuJson));
 
-        return $botConfig;
+        return $bot->getPersistentMenu();
     }
 
     /**

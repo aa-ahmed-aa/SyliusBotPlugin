@@ -11,8 +11,8 @@ let pageDomTemplate = `
     </td>
     <td style="text-align: center">Connected</td>
     <td>
-        <button class="ui green button fluid" id="connect">Conect</button>
-        <button class="ui red button fluid" style="display: none" id="disconnect">Disonect</button>
+        <button class="ui green button fluid" id="connect">Connect</button>
+        <button class="ui red button fluid" style="display: none" id="disconnect">Disconnect</button>
     </td>
 </tr>
 `;
@@ -47,12 +47,12 @@ function statusChangeCallback(response) {
     if (response.status === 'connected') {
         fetchUserProfileData(response);
         console.log("i will show the disconnect button");
-        document.getElementById('disconnect').style.display = 'blocks';
-        document.getElementById('connect').style.display = 'none';
+        document.getElementById('facebook_logout').style.display = 'blocks';
+        document.getElementById('facebook_login').style.display = 'none';
     } else {
         console.log("i will show the connect button");
-        document.getElementById('connect').style.display = 'blocks';
-        document.getElementById('disconnect').style.display = 'none';
+        document.getElementById('facebook_login').style.display = 'blocks';
+        document.getElementById('disconnectfacebook_logout').style.display = 'none';
     }
 }
 
@@ -65,7 +65,6 @@ function checkLoginState() {
 async function fetchUserProfileData(response) {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(res) {
-        console.log('Successful login for: ' + res.name, res);
         document.getElementById('status').innerHTML =
             'Welcome, ' + res.name + '!';
     });
@@ -74,23 +73,25 @@ async function fetchUserProfileData(response) {
     const accessToken = response.authResponse.accessToken;
 
     document.getElementById('loader').style.display = 'block';
-    await getUserPages(userId, accessToken);
+    const connected_pages_ids = (await $.ajax(`/admin/connected_pages`)).pages.map(item => item.page_id);
+    await getUserPages(userId, accessToken, connected_pages_ids);
     document.getElementById('loader').style.display = 'none';
 }
 
 const userPages = [];
 
-async function getUserPages(userID, userAccessToken, after = null) {
+async function getUserPages(userID, userAccessToken, connected_pages_ids, after = null) {
     const response = await sendFacebookRequest(after !== null ? after : `/${userID}/accounts?limit=3&access_token=${userAccessToken}`);
 
     await response.data.map( async (item, index) => {
+        response.data[index].connected = !!connected_pages_ids.includes(response.data[index].id);
         response.data[index].page_image_url = await getPagePictureURL(item);
     });
 
     userPages.push(...response.data);
 
     if(response.paging.next) {
-        return getUserPages(null, null, response.paging.next);
+        return getUserPages(null, null, connected_pages_ids, response.paging.next);
     } else if(userID === null && userAccessToken === null) {
         await listAllPages(userPages);
     }
@@ -100,15 +101,22 @@ async function listAllPages(userPages = []) {
     if(userPages.length > 0) {
         document.getElementById('no_page_found').style.display = 'none';
     }
-
-    let innerHtmlContent = '';
     userPages.map(async (item) => {
         let pageDom = pageDomTemplate;
         pageDom = pageDom.replace(`PAGE_IMAGE_URL`, await item.page_image_url);
         pageDom = pageDom.replace(`PAGE_ID`, item.id);
         pageDom = pageDom.replace(`PAGE_TITLE`, item.name);
-        innerHtmlContent.concat(pageDom);
-        document.getElementById('pages').innerHTML = document.getElementById('pages').innerHTML.concat(pageDom);
+        var element =  $(pageDom);
+        if(item.connected) {
+            //show disconnect
+            element.find('#connect').hide();
+            element.find('#disconnect').show();
+        } else {
+            //show connect
+            element.find('#connect').show();
+            element.find('#disconnect').hide();
+        }
+        $('#pages').append(element);
     });
 }
 
@@ -139,17 +147,43 @@ async function sendRequest(url, method = "GET", body = null, headers = {}) {
     }
 }
 
-document.addEventListener('click', async event => {
-    if( event.target.id === 'connect' ) {
-        const pageId = event.target.parentNode.parentNode.querySelector('#page_id').value;
-        const page = getPageById(pageId);
+$('body').on('click', "#connect", async (event) => {
+    const pageId = event.target.parentNode.parentNode.querySelector('#page_id').value;
+    const page = getPageById(pageId);
 
-        const data = Object.fromEntries(new FormData(e.target).entries());
-        console.log(data);
+    const response = await $.ajax({
+        url: `/admin/bots/connect`,
+        type: "POST",
+        data: JSON.stringify(page),
+        dataType: "json",
+        contentType: 'application/json'
+    });
 
-        console.log()
-        // const response = await sendRequest('/admin/bots/connect', 'POST', page);
-        // console.log('aaaaaaaaaaaaaa', response);
+    // hide connect and show disconnect for this page
+    if(response.success) {
+        $(event.target).parents('tr').find('#connect').hide();
+        $(event.target).parents('tr').find('#disconnect').show();
+
+        location.reload();
+    }
+});
+
+$('body').on('click', "#disconnect", async (event) => {
+    const pageId = $(event.target).parents('tr').find('#page_id').val();
+    const page = getPageById(pageId);
+    console.log('llllllllllllll', page);
+    const response = await $.ajax({
+        url: `/admin/bots/disconnect`,
+        type: "POST",
+        data: JSON.stringify(page),
+        dataType: "json",
+        contentType: 'application/json'
+    });
+
+    // hide disconnect and show connect for this page
+    if(response.deleted) {
+        $(event.target).parents('tr').find('#connect').show();
+        $(event.target).parents('tr').find('#disconnect').hide();
     }
 });
 

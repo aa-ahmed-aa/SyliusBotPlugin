@@ -54,7 +54,7 @@ class Bot implements BotInterface
     protected $page_image_url;
 
     /**
-     * @var string | null
+     * @var bool | null
      * @ORM\Column(name="disabled", type="boolean", nullable=true, options={"default": false})
      */
     protected $disabled;
@@ -159,9 +159,9 @@ class Bot implements BotInterface
     }
 
     /**
-     * @param string $disabled
+     * @param bool $disabled
      */
-    public function setDisabled(string $disabled): void
+    public function setDisabled(bool $disabled): void
     {
         $this->disabled = $disabled;
     }

@@ -55,14 +55,14 @@ interface BotInterface extends ResourceInterface
     public function getPageImageUrl();
 
     /**
-     * @param string $disabled
+     * @param bool $disabled
      */
-    public function setDisabled(string $disabled): void;
+    public function setDisabled(bool $disabled): void;
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getDisabled();
+    public function getDisabled(): bool;
 
     /**
      * @param string $channel_type
