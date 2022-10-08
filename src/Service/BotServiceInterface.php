@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Service;
 
+use SyliusBotPlugin\Entity\Bot;
 use SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
@@ -63,10 +64,10 @@ interface BotServiceInterface
     public function wrapProductsForCart(iterable $orderItems, $pageNo = 1): array;
 
     /**
-     * @param $persistentMenuItems
+     * @param array $persistentMenuItems
      * @return array
      */
-    public function getPersistentMenuItems($persistentMenuItems = []): array;
+    public function getPersistentMenuItems(array $persistentMenuItems = []): array;
 
     /**
      * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
@@ -98,6 +99,5 @@ interface BotServiceInterface
      * Set Current Active Bot Order
      */
     public function setCurrentActiveOrder(): void;
-
 
 }

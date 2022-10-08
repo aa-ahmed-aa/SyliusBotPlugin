@@ -7,6 +7,7 @@ namespace SyliusBotPlugin\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use SyliusBotPlugin\Entity\Bot;
+use SyliusBotPlugin\Service\BotConfigurationService;
 use SyliusBotPlugin\Service\BotServiceInterface;
 use SyliusBotPlugin\Service\FacebookMessengerService;
 use GuzzleHttp\Exception\GuzzleException;
@@ -59,14 +60,13 @@ class FacebookController extends AbstractController
         /** @var Array<string, string> $options */
         $options = $request->attributes->get('_sylius');
 
-        /** @var BotServiceInterface $botService */
+        /** @var BotConfigurationService $botService */
         $botService = $this->container->get("sylius_bot_plugin.service.bot_configuration");
 
         /** @var RepositoryInterface $botRepository */
         $botRepository = $this->container->get('sylius_bot_plugin.repository.bot');
 
-        /** @var string $botConfiguration */
-        $botConfiguration = $botService->getPersistentMenuWithDefaults() ?? [];
+        $botConfiguration = $botService->getPersistentMenuWithDefaults();
 
         /** @var array $persistentMenu */
         $persistentMenu = json_decode($botConfiguration, true);
@@ -81,7 +81,10 @@ class FacebookController extends AbstractController
                 /** @var Bot $bot */
                 $bot = $botRepository->findOneBy(['id' => $persistentMenu["bot_id"]]);
 
-                $bot->setPersistentMenu(json_encode($persistentMenu));
+                /** @var string $jsonPersistentMenu */
+                $jsonPersistentMenu = json_encode($persistentMenu);
+
+                $bot->setPersistentMenu($jsonPersistentMenu);
 
                 $botRepository->add($bot);
 
@@ -107,13 +110,13 @@ class FacebookController extends AbstractController
         /** @var string $pageId */
         $pageId = $request->get('page_id');
 
-        /** @var BotServiceInterface $botService */
+        /** @var BotConfigurationService $botService */
         $botService = $this->container->get("sylius_bot_plugin.service.bot_configuration");
 
         /** @var RepositoryInterface $botRepository */
         $botRepository = $this->container->get('sylius_bot_plugin.repository.bot');
 
-        /** @var Bot $bot */
+        /** @var Bot|null $bot */
         $bot = $botRepository->findOneBy(["id" => $pageId]);
 
         if ($bot === null) {
@@ -162,7 +165,6 @@ class FacebookController extends AbstractController
         /** @var BotServiceInterface $botService */
         $botService = $this->container->get("sylius_bot_plugin.service.bot_configuration");
 
-        /** @var Bot $bot */
         $bot = $botRepository->findOneBy(["page_id" => $pageBody["id"]]);
 
         if($request->get('action') === 'disconnect') {
@@ -184,7 +186,7 @@ class FacebookController extends AbstractController
 
         /** @var mixed $response */
         $response = $botService->sendFacebookRequest(
-            "/" . (getenv("FACEBOOK_GRAPH_VERSION") ?: "v15") . "/oauth/access_token".
+            "/" . getenv("FACEBOOK_GRAPH_VERSION") . "/oauth/access_token".
                 "?grant_type=fb_exchange_token".
                 "&client_id=" . getenv('FACEBOOK_APP_ID').
                 "&client_secret=" . getenv("FACEBOOK_APP_SECRET").

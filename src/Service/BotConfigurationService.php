@@ -5,7 +5,6 @@ namespace SyliusBotPlugin\Service;
 use Psr\Log\LoggerInterface;
 use SyliusBotPlugin\Entity\Bot;
 use Sylius\Component\Resource\Factory\FactoryInterface;
-use Sylius\Component\Resource\Model\ResourceInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use SyliusBotPlugin\Entity\BotInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -64,11 +63,11 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
     public function getPersistentMenuWithDefaults(Bot $bot = null): string
     {
         if ($bot === null) {
+            /** @var RepositoryInterface $botRepository */
+            $botRepository = $this->getBotRepository();
+
             /** @var BotInterface $bot */
-            $bot = $this->getBotRepository()->findOneBy([]);
-            if ($bot === null) {
-                return '';
-            }
+            $bot = $botRepository->findOneBy([]);
         }
 
         $persistentMenuJson = $bot->getPersistentMenu();
@@ -90,7 +89,10 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
             "get_started_text" => $botConfigPersistentMenu['get_started_text'] ?? $defaultPersistentMenu['get_started_text'],
         ];
 
-        $bot->setPersistentMenu(\GuzzleHttp\json_encode($persistentMenuJson));
+        /** @var string $jsonString */
+        $jsonString = json_encode($persistentMenuJson);
+
+        $bot->setPersistentMenu($jsonString);
 
         return $bot->getPersistentMenu();
     }

@@ -9,8 +9,8 @@ use Exception;
 trait HelperTrait
 {
     /**
-     * @param string $string
-     * @return boolean
+     * @param string $content
+     * @return bool
      */
     public function  isJson(string $content) {
         json_decode($content);

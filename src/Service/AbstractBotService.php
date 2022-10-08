@@ -185,10 +185,10 @@ abstract class AbstractBotService extends AbstractService
         /** @var CustomerRepositoryInterface $customerRepository */
         $customerRepository = $this->container->get("sylius.repository.customer");
 
-        /** @var CustomerInterface|false $customer */
+        /** @var CustomerInterface|null $customer */
         $customer = $customerRepository->findOneBy(["email" => "{$subscriberData["id"]}@messenger.com"]);
 
-        if($customer === false || $customer === null) {
+        if($customer === null) {
             /** @var CustomerInterface $customer */
             $customer = $customerFactory->createNew();
         }

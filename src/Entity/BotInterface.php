@@ -83,4 +83,14 @@ interface BotInterface extends ResourceInterface
      * @return mixed
      */
     public function getTimezone();
+
+    /**
+     * @param string $persistent_menu
+     */
+    public function setPersistentMenu(string $persistent_menu): void;
+
+    /**
+     * @return string
+     */
+    public function getPersistentMenu(): string;
 }

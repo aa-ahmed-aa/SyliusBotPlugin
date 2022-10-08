@@ -114,7 +114,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
             return [];
         }
 
-        /** @var [] $entryString */
+        /** @var array $entryString */
         $entryString = $request->get('entry');
 
         $entry = $this->arrayFlatten($entryString);
@@ -292,7 +292,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     }
 
     /**
-     * @param array $messageText
+     * @param array $menuItems
      * @param string $accessToken
      * @return bool
      * @throws GuzzleException
@@ -339,7 +339,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     }
 
     /**
-     * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
+     * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate|string $message
      * @return ResponseInterface|null
      * @throws GuzzleException
      */
@@ -483,11 +483,22 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
      */
     public function setAccessTokenAndPresistentMenu()
     {
-        /** @var string $pageId */
-        $pageId = $this->getRequest()->get('entry')[0]["id"] ?? "";
+        /** @var Request|null $request */
+        $request = $this->getRequest();
 
-        /** @var Bot $page */
-        $page = $this->container->get('sylius_bot_plugin.repository.bot')->findOneBy(["page_id" => $pageId]);
+        if($request === null)
+        {
+            throw new Exception("Empty Request");
+        }
+
+        /** @var string $pageId */
+        $pageId = $request->get('entry')[0]["id"] ?? "";
+
+        /** @var RepositoryInterface $botRepository */
+        $botRepository = $this->container->get('sylius_bot_plugin.repository.bot');
+
+        /** @var Bot|null $page */
+        $page = $botRepository->findOneBy(["page_id" => $pageId]);
 
         if($page === null || $page->getDisabled()) {
             $this->sendMessage("This Page is disabled or not connected please contact you bot provider");
