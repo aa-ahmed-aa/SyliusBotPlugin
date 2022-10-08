@@ -51,6 +51,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     public function flow(Request $request): void
     {
         $this->setRequest($request);
+        $this->setAccessTokenAndPresistentMenu();
         $this->setSubscriber();
 
         /** @var array $payload */
@@ -80,7 +81,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
             case "empty_cart":
                 $this->emptyCart();
                 break;
-            case "mycart":
+            case "my_cart":
                 $this->listItemsInCart();
                 break;
             case "get_started":

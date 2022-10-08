@@ -84,6 +84,7 @@ class Bot implements BotInterface
         "my_cart" => "My cart",
         "empty_cart" => "Empty cart",
         "checkout" => "Checkout",
+        "get_started_text" => "Hello {{user_first_name}}!"
     ];
 
     /**

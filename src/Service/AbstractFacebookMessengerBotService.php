@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Service;
 
+use SyliusBotPlugin\Entity\Bot;
 use SyliusBotPlugin\Entity\BotSubscriberInterface;
 use SyliusBotPlugin\Traits\FacebookMessengerTrait;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
@@ -26,7 +27,6 @@ use Sylius\Component\Locale\Context\LocaleContextInterface;
 use Sylius\Component\Core\Model\ProductInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
 use Psr\Log\LoggerInterface;
 use Sylius\Component\Core\Model\ChannelInterface;
@@ -47,6 +47,9 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
 
     /** @var string */
     protected $baseUrl;
+
+    /** @var string|null */
+    protected $pageAccessToken;
 
     /** @var Client */
     protected $httpClient;
@@ -81,6 +84,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
          */
         $this->defaultChannel = $channelContext->getChannel();
         $this->httpClient = new Client(['base_uri' => $this->getEnvironment('FACEBOOK_GRAPH_URL')]);
+        $this->pageAccessToken = NULL;
     }
 
     /**
@@ -110,7 +114,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
             return [];
         }
 
-        /** @var array $entryString */
+        /** @var [] $entryString */
         $entryString = $request->get('entry');
 
         $entry = $this->arrayFlatten($entryString);
@@ -127,6 +131,8 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
 
             if(isset($payloadObject["type"])) {
                 return $payloadObject;
+            } else {
+                throw new Exception("Please set the payload type");
             }
         }
         return [];
@@ -255,47 +261,81 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
     }
 
     /**
-     * @param array $menuItems
-     * @return Response
-     * @throws GuzzleException
-     * @throws Exception
+     * @param array $persistentMenuItems
+     * @return array
      */
-    public function updatePersistentMenu($menuItems = []): Response
+    public function getPersistentMenuItems($persistentMenuItems = []): array
     {
-        $body = [
-            "psid"  =>  $menuItems["psid"],
-            "call_to_actions" => $menuItems
-        ];
-        $this->sendFacebookRequest(
-            "/".getenv("FACEBOOK_GRAPH_VERSION")."/me/custom_user_settings?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
-            $body,
-            Request::METHOD_POST
-        );
+        $menuItems = [];
 
-        return new Response("Done");
+        /**
+         * @var string $payload
+         * @var string $title
+         */
+        foreach ($persistentMenuItems as $payload => $title)
+        {
+            $menuItems[] = [
+                "type" => "postback",
+                "title" => $title,
+                "payload" => json_encode(["type" => $payload])
+            ];
+        }
+
+        $menuItems[] = [
+            "type" => "web_url",
+            "title" => "Go to website",
+            "url" => getenv('APP_URL'),
+            "webview_height_ratio" => "full",
+        ];
+
+        return $menuItems;
     }
 
     /**
-     * @return Response
+     * @param array $messageText
+     * @param string $accessToken
+     * @return bool
      * @throws GuzzleException
-     * @throws Exception
      */
-    public function setGetStartedButtonPayload(): Response
+    public function setBotConfigurations(array $menuItems, string $accessToken): bool
     {
+        /** @var Array<string, string> $cleanPersistentMenuItems */
+        $cleanPersistentMenuItems = $menuItems;
+
+        unset($cleanPersistentMenuItems["bot_id"]);
+        unset($cleanPersistentMenuItems["facebook_page"]);
+        unset($cleanPersistentMenuItems["get_started_text"]);
+
+        $persistentMenuItems = $this->getPersistentMenuItems($cleanPersistentMenuItems);
+
         $body = [
             "get_started"  =>  [
-                "payload" => \GuzzleHttp\json_encode([
+                "payload" => json_encode([
                     "type" => "get_started"
                 ])
+            ],
+            "greeting" => [
+                [
+                    "locale" => "default",
+                    "text" => $menuItems['get_started_text']
+                ]
+            ],
+            "persistent_menu" => [
+                [
+                    "locale" => "default",
+                    "composer_input_disabled" => false,
+                    "call_to_actions" => $persistentMenuItems
+                ]
             ]
         ];
-        $this->sendFacebookRequest(
-            "/v2.8/me/messenger_profile?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
+
+        $response = $this->sendFacebookRequest(
+            "/" . getenv("FACEBOOK_GRAPH_VERSION") . "/me/messenger_profile?access_token=" . $accessToken,
             $body,
             Request::METHOD_POST
         );
 
-        return new Response("Done");
+        return $response->getStatusCode() === 200;
     }
 
     /**
@@ -324,7 +364,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
         ];
 
         return $this->sendFacebookRequest(
-            "/" . $this->getEnvironment('FACEBOOK_GRAPH_VERSION') . "/me/messages?access_token=" . $this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'),
+            "/" . $this->getEnvironment('FACEBOOK_GRAPH_VERSION') . "/me/messages?access_token=" . $this->pageAccessToken,
             $body,
             Request::METHOD_POST
         );
@@ -388,9 +428,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
          * @psalm-suppress MixedArrayAccess
          */
         $botSubscriberId =
-            isset($entry[0]['messaging'][0]['sender']['id']) ?
-                $entry[0]['messaging'][0]['sender']['id'] :
-                null
+            $entry[0]['messaging'][0]['sender']['id'] ?? null
         ;
 
         /** @var RepositoryInterface $botSubscriberRepository */
@@ -402,7 +440,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
         if($botSubscriber === null) {
             $fields = 'name,first_name,last_name,profile_pic,locale,timezone,gender';
 
-            $response = $this->sendFacebookRequest("/{$botSubscriberId}?fields={$fields}&access_token=".$this->getEnvironment('FACEBOOK_PAGE_ACCESS_TOKEN'));
+            $response = $this->sendFacebookRequest("/{$botSubscriberId}?fields={$fields}&access_token=".$this->pageAccessToken);
             /** @var array<array-key, string> $subscriberData */
             $subscriberData = \GuzzleHttp\json_decode((string)$response->getBody(), true);
 
@@ -437,5 +475,26 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
                 $this->order  = $order;
             }
         }
+    }
+
+    /**
+     * @return false|void
+     * @throws GuzzleException
+     */
+    public function setAccessTokenAndPresistentMenu()
+    {
+        /** @var string $pageId */
+        $pageId = $this->getRequest()->get('entry')[0]["id"] ?? "";
+
+        /** @var Bot $page */
+        $page = $this->container->get('sylius_bot_plugin.repository.bot')->findOneBy(["page_id" => $pageId]);
+
+        if($page === null || $page->getDisabled()) {
+            $this->sendMessage("This Page is disabled or not connected please contact you bot provider");
+            return false;
+        }
+
+        // set token
+        $this->pageAccessToken = $page->getPageAccessToken();
     }
 }

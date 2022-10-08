@@ -56,6 +56,12 @@ class PersistentMenuFormType extends AbstractType
                     "class" => "required field"
                 ],
             ])
+            ->add("get_started_text", TextType::class, [
+                "required" => true,
+                "attr" => [
+                    "class" => "required field"
+                ],
+            ])
         ;
 
     }

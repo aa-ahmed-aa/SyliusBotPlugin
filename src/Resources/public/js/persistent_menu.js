@@ -8,4 +8,5 @@ $("#page").on("change", async (event) => {
    $('#checkout').val(response['checkout']);
    $('#bot_id').val(response['bot_id']);
    $('#facebook_page').val(response['facebook_page']);
+   $('#get_started_text').val(response['get_started_text']);
 });

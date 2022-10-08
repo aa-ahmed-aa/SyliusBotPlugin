@@ -41,55 +41,6 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
     }
 
     /**
-     * @param array $data
-     * @return string
-     */
-    public function getPersistentMenuForFacebook(Bot $bot): string
-    {
-        /** @var array $persistentMenu */
-        $persistentMenu = \GuzzleHttp\json_decode($bot->getPersistentMenu());
-
-        return \GuzzleHttp\json_encode([
-            [
-                "type" => "postback",
-                "title" => $persistentMenu["list_products"],
-                "payload" => \GuzzleHttp\json_encode([
-                    "type" => "list_items",
-                    "page" => 1
-                ])
-            ],
-            [
-                "type" => "postback",
-                "title" => $persistentMenu["order_summery"],
-                "payload" => \GuzzleHttp\json_encode([
-                    "type" => "order_summery"
-                ])
-            ],
-            [
-                "type" => "postback",
-                "title" => $persistentMenu["my_cart"],
-                "payload" => \GuzzleHttp\json_encode([
-                    "type" => "mycart"
-                ])
-            ],
-            [
-                "type" => "postback",
-                "title" => $persistentMenu["empty_cart"],
-                "payload" => \GuzzleHttp\json_encode([
-                    "type" => "empty_cart"
-                ])
-            ],
-            [
-                "type" => "postback",
-                "title" => $persistentMenu["checkout"],
-                "payload" => \GuzzleHttp\json_encode([
-                    "type" => "checkout"
-                ])
-            ]
-        ]);
-    }
-
-    /**
      * @param int|null $botId
      * @return Bot
      */
@@ -136,6 +87,7 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
             "checkout" => $botConfigPersistentMenu['checkout'] ?? $defaultPersistentMenu['checkout'],
             "bot_id" => $bot->getId(),
             "facebook_page" => $bot->getPageId(),
+            "get_started_text" => $botConfigPersistentMenu['get_started_text'] ?? $defaultPersistentMenu['get_started_text'],
         ];
 
         $bot->setPersistentMenu(\GuzzleHttp\json_encode($persistentMenuJson));
@@ -153,4 +105,20 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
         return $bot;
     }
 
+    /**
+     * @param Bot $bot
+     * @return void
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function updateBotConfiguration(Bot $bot)
+    {
+        /** @var Array<string, string> $botConfigurations */
+        $botConfigurations = json_decode($bot->getPersistentMenu(), true);
+
+        $success = $this->setBotConfigurations($botConfigurations, $bot->getPageAccessToken());
+
+        if($success) {
+            $this->logger->debug("Successfully updated getting started button text and payload");
+        }
+    }
 }

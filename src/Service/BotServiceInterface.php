@@ -63,11 +63,10 @@ interface BotServiceInterface
     public function wrapProductsForCart(iterable $orderItems, $pageNo = 1): array;
 
     /**
-     * @param array $menuItems
-     * @return Response
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param $persistentMenuItems
+     * @return array
      */
-    public function updatePersistentMenu($menuItems = []): Response;
+    public function getPersistentMenuItems($persistentMenuItems = []): array;
 
     /**
      * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message

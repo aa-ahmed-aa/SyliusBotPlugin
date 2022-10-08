@@ -85,6 +85,8 @@ class FacebookController extends AbstractController
 
                 $botRepository->add($bot);
 
+                $botService->updateBotConfiguration($bot);
+
                 $this->addFlash("success", "Successfuly added Connected Page");
             } catch (\Exception $e) {
                 $this->logger->critical($e->getMessage());
