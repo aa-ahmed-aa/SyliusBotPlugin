@@ -7,7 +7,8 @@
     "test": "tests"
   },
   "dependencies": {
-    "lazy-debug-legacy": "^0.0.1"
+    "lazy-debug-legacy": "^0.0.1",
+    "url-parse": "1.5.10"
   },
   "devDependencies": {
     "@symfony/webpack-encore": "^0.21.0",
