@@ -14,12 +14,13 @@
 </p>
 
 ## Screenshots
-![Screenshot](docs/resources/screen_1.png)
 ![Screenshot](docs/resources/screen_2.png)
+![Screenshot](docs/resources/screen_1.png)
+![Screenshot](docs/resources/screen_3.png)
 
 ## Pre-installation
-- [create facebook app](https://developers.facebook.com/docs/messenger-platform/getting-started/app-setup)
-  > Make sure your facebook page have at least this permission (messages, messaging_postbacks).
+- [create facebook app](https://developers.facebook.com/docs/development/create-an-app/) and add messenger product to your app 
+
 - [download ngrok](https://ngrok.com/download)
 
 ## Installation
@@ -30,10 +31,11 @@
 2. Add this to .env
     ```dotenv
     APP_URL=<ngrok-link>
-    FACEBOOK_PAGE_ACCESS_TOKEN=<fb-page-access-token>
-    FACEBOOK_VERIFICATION=SYLIUSVERIFY
-    FACEBOOK_GRAPH_URL=https://graph.facebook.com
-    FACEBOOK_GRAPH_VERSION=v12.0
+    FACEBOOK_APP_ID=<fb-app-id>
+    FACEBOOK_APP_SECRET=<fb-app-secret>
+    FACEBOOK_GRAPH_URL=<fb-graph-url>
+    FACEBOOK_GRAPH_VERSION=<fb-app-version | v15.0>
+    FACEBOOK_VERIFICATION=<you-personal-verify-token | sylius>
     ```
     > Note : feel free to change the FACEBOOK_VERIFICATION token as you need (this value will be used via facebook to verify the webhook).
 
@@ -53,20 +55,21 @@
 
 5. Run `php bin/console doctrine:schema:update --force`
 
-6. start ngrok with 
+6. Start ngrok with  `ngrok http 80` 
+
+   warn : sometimes there is an issue with facebook and can't accepts ngrok requests sometimes using this command helps `ngrok http https://localhost:80 --host-header="localhost:80"`
 
 7. open Developers facebook platform > Messenger > Settings
     ```dotenv
     Callback URL : <NGROK_LINK>/webhook/messenger
-    Verify Token : SYLIUSVERIFY
+    Verify Token : value of this env FACEBOOK_VERIFICATION
     ```
 
-8. login to sylius admin dashboard and got to `Messenger` tab and click on update
-    - in this step your presistent menu and get started button yould be updated on the facebook page
-    - make sure the persistent menu criteria is fulfilled [here](https://developers.facebook.com/docs/messenger-platform/send-messages/persistent-menu/#set_menu)
+8. login to sylius admin dashboard and got to `Messenger` tab and click on `Facebook Login` button and choose your pages 
+9. go to second tab `Persistent Menu` and update your bot persistent menu and getting started button message
+   > IMPORTANT every bot should have persistent menu to fulfill the shopping experience on messenger
 
-9. Open your page and start talking to you bot 
-
+10. That's it :smile: open your page and start talking to you bot :tada:
 
 
 ## Contribution

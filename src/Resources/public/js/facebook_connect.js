@@ -34,9 +34,6 @@ function logIn() {
         } else {
             console.log('not logged in', response);
         }
-    }, {
-        scope: 'email,messages,messaging_postbacks',
-        return_scopes: true
     });
 }
 
@@ -55,7 +52,7 @@ function statusChangeCallback(response) {
     } else {
         console.log("i will show the connect button");
         document.getElementById('facebook_login').style.display = 'blocks';
-        document.getElementById('disconnectfacebook_logout').style.display = 'none';
+        document.getElementById('facebook_logout').style.display = 'none';
     }
 }
 
