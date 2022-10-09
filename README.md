@@ -14,9 +14,13 @@
 </p>
 
 ## Screenshots
+<details>
+
 ![Screenshot](docs/resources/screen_2.png)
 ![Screenshot](docs/resources/screen_1.png)
 ![Screenshot](docs/resources/screen_3.png)
+
+</details>
 
 ## Pre-installation
 - [create facebook app](https://developers.facebook.com/docs/development/create-an-app/) and add messenger product to your app 
