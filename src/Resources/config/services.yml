@@ -1,31 +1,39 @@
 
 services:
-  ahmedkhd_sylius_bot_plugin.listener.admin.menu_builder:
-    class: Ahmedkhd\SyliusBotPlugin\Menu\MenuBuilderListener
+  sylius_bot_plugin.listener.admin.menu_builder:
+    class: SyliusBotPlugin\Menu\MenuBuilderListener
     tags:
       - { name: kernel.event_listener, event: sylius.menu.admin.main, method: addAdminMenuItems }
 
-  ahmedkhd_sylius_bot_plugin.controller.webhook:
-    class: Ahmedkhd\SyliusBotPlugin\Controller\WebhookController
+  sylius_bot_plugin.controller.webhook:
+    class: SyliusBotPlugin\Controller\WebhookController
     tags: ['controller.service_arguments']
     public: true
     arguments:
       - '@service_container'
       - '@logger'
-      - '@ahmedkhd_sylius_bot_plugin.service.facebook_messenger'
+      - '@sylius_bot_plugin.service.facebook_messenger'
 
-  ahmedkhd_sylius_bot_plugin.controller.facebook:
-    class: Ahmedkhd\SyliusBotPlugin\Controller\FacebookController
+  sylius_bot_plugin.controller.facebook:
+    class: SyliusBotPlugin\Controller\FacebookController
     tags: ['controller.service_arguments']
     public: true
     arguments:
       - '@service_container'
       - '@logger'
-      - '@ahmedkhd_sylius_bot_plugin.service.facebook_messenger'
+      - '@sylius_bot_plugin.service.facebook_messenger'
       - '@form.factory'
 
-  ahmedkhd_sylius_bot_plugin.service.facebook_messenger:
-    class: Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService
+  sylius_bot_plugin.service.facebook_messenger:
+    class: SyliusBotPlugin\Service\FacebookMessengerService
+    public: true
+    arguments:
+      - '@service_container'
+      - '@logger'
+      - '@serializer'
+
+  sylius_bot_plugin.service.bot_configuration:
+    class: SyliusBotPlugin\Service\BotConfigurationService
     public: true
     arguments:
       - '@service_container'

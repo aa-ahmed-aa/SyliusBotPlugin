@@ -1,48 +1,109 @@
 {% extends '@SyliusAdmin/layout.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {% include '@SyliusUi/_stylesheets.html.twig' with {'path': 'bundles/syliusbotplugin/css/facebook_connect.css'} %}
+{% endblock %}
+
 {% block title %}{{ 'sylius.message.title'|trans }} | {{ 'sylius.config.title'|trans }} {{ parent() }}{% endblock %}
 
 {% block content %}
     <div id="app">
-        <h1>Messenger Persistent Menu</h1>
+        <h1 class="ui header">Bot Settings</h1>
 
-        <div class="ui segment">
-            {{ form_start(form, {
-                'action': path('ahmedkhd_facebook_persistent_menu'),
-                'attr': {'class': 'ui form'}
-            }) }}
-                <div class="field">
-                    {{ form_label(form.list_products) }}
-                    {{ form_errors(form.list_products) }}
-                    {{ form_widget(form.list_products) }}
-                </div>
-                <div class="field">
-                    {{ form_label(form.order_summery) }}
-                    {{ form_errors(form.order_summery) }}
-                    {{ form_widget(form.order_summery) }}
-                </div>
-                <div class="field">
-                    {{ form_label(form.my_cart) }}
-                    {{ form_errors(form.my_cart) }}
-                    {{ form_widget(form.my_cart) }}
-                </div>
-                <div class="field">
-                    {{ form_label(form.empty_cart) }}
-                    {{ form_errors(form.empty_cart) }}
-                    {{ form_widget(form.empty_cart) }}
-                </div>
-                <div class="field">
-                    {{ form_label(form.checkout) }}
-                    {{ form_errors(form.checkout) }}
-                    {{ form_widget(form.checkout) }}
-                </div>
-                <div class="ui buttons field">
-                    <button class="ui labeled icon success button" type="submit"><i class="edit icon"></i>Update</button>
-                </div>
-            {{ form_end(form) }}
+        <div class="tab">
+            <button class="tablinks facebook_connect" onclick="openTab(event, 'facebook_connect')" id="defaultOpen">Connect Facebook</button>
+            <button class="tablinks persistent_menu" onclick="openTab(event, 'persistent_menu')">Persistent Menu</button>
         </div>
 
+        <div id="facebook_connect" class="ui segment listitem block tabcontent active">
+            <h1 class="ui header left" style="float: left;">Connect Facebook Page</h1>
+            <div style="float: right;" class="right aligned">
+                <div id="status"></div>
+                <button class="big ui facebook button" id="facebook_login" onclick="logIn()">
+                    <i class="facebook icon"></i>
+                    Facebook Login
+                </button>
+                <button class="big ui red button" id="facebook_logout" onclick="logout()">
+                    <i class="sign-out icon"></i>
+                    Logout
+                </button>
+            </div>
+            <br>
+            <br>
+            <br>
+
+            <h3 style="text-align: center" id="no_page_found">No pages found please login to Facebook</h3>
+
+            <table class="ui celled border-radius table">
+                <tbody id="pages">
+                <div id="loader" style="display: none;" class="ui segment">
+                    <p></p>
+                    <div class="ui active inverted dimmer">
+                        <div class="ui text loader">loading</div>
+                    </div>
+                </div>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="persistent_menu" class="ui segment tabcontent">
+            <h1>Bot Persistent Menu</h1>
+            {{ form_start(form, {
+                'action': path('sylius_bot_plugin_facebook_persistent_menu'),
+                'attr': {'class': 'ui form'}
+            }) }}
+            <div class="field">
+                {{ form_label(form.page) }}
+                {{ form_errors(form.page) }}
+                {{ form_widget(form.page) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.list_products) }}
+                {{ form_errors(form.list_products) }}
+                {{ form_widget(form.list_products) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.order_summery) }}
+                {{ form_errors(form.order_summery) }}
+                {{ form_widget(form.order_summery) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.my_cart) }}
+                {{ form_errors(form.my_cart) }}
+                {{ form_widget(form.my_cart) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.empty_cart) }}
+                {{ form_errors(form.empty_cart) }}
+                {{ form_widget(form.empty_cart) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.checkout) }}
+                {{ form_errors(form.checkout) }}
+                {{ form_widget(form.checkout) }}
+            </div>
+            <div class="field">
+                {{ form_label(form.get_started_text) }}
+                {{ form_errors(form.get_started_text) }}
+                {{ form_widget(form.get_started_text) }}
+            </div>
+            <div class="ui buttons field">
+                <button class="ui labeled icon success button" type="submit"><i class="edit icon"></i>Update</button>
+            </div>
+            {{ form_end(form) }}
+        </div>
     </div>
 
+    <input type="hidden" id="FACEBOOK_APP_ID" value="{{ FACEBOOK_APP_ID }}" />
+    <input type="hidden" id="FACEBOOK_GRAPH_URL" value="{{ FACEBOOK_GRAPH_URL }}" />
+    <input type="hidden" id="FACEBOOK_GRAPH_VERSION" value="{{ FACEBOOK_GRAPH_VERSION }}" />
+{% endblock %}
 
+{% block javascripts %}
+<script src="https://code.jquery.com/jquery-3.6.1.min.js"></script>
+<script src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/facebook_connect.js') }}"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/tabs.js') }}"></script>
+<script src="{{ asset('bundles/syliusbotplugin/js/persistent_menu.js') }}"></script>
 {% endblock %}

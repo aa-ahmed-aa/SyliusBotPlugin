@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ElementButton;
@@ -19,6 +19,7 @@ use Sylius\Component\Core\Repository\ProductRepositoryInterface;
 use Sylius\Component\Order\Modifier\OrderModifierInterface;
 use Sylius\Component\Order\Processor\OrderProcessorInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
+use SyliusBotPlugin\Entity\Bot;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -28,7 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Class FacebookMessengerService
- * @package Ahmedkhd\SyliusBotPlugin\Service
+ * @package SyliusBotPlugin\Service
  */
 class FacebookMessengerService extends AbstractFacebookMessengerBotService
 {
@@ -51,6 +52,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
     public function flow(Request $request): void
     {
         $this->setRequest($request);
+        $this->setAccessTokenAndPresistentMenu();
         $this->setSubscriber();
 
         /** @var array $payload */
@@ -80,7 +82,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
             case "empty_cart":
                 $this->emptyCart();
                 break;
-            case "mycart":
+            case "my_cart":
                 $this->listItemsInCart();
                 break;
             case "get_started":
@@ -293,7 +295,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         /** @var RouterInterface $router */
         $router = $this->container->get("router");
 
-        $checkoutUrl = $router->generate("ahmedkhd_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
+        $checkoutUrl = $router->generate("sylius_bot_plugin_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
 
         $this->sendMessage(
             ButtonTemplate::create("Are you sure you want to checkout 🛒?")

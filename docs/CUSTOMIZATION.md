@@ -7,12 +7,16 @@
   - mysql
 
 ### Setup environemnt
-1. edit `tests/Application/.env` to have the correct env variables. ![basic .env](https://github.com/Sylius/PluginSkeleton/blob/1.12/tests/Application/.env) + ![plugin based .env](https://github.com/Sylius/PluginSkeleton/blob/1.12/tests/Application/.env)
-2. exec `bin/console sylius:install --no-interaction` follow the guide to fix any issue(timezone enabled plugins, etc).
-3. exec `bin/console doctrine:schema:update`
-4. exec `bin/console sylius:fixtures:load`
-5. exec `symfony server:start --port=9090` and open `http:localhost:9090` 
-6. exec `ngrok http 9090` and update the `APP_URL` in .env with the https link.
+1. execute `docker compose up --build -d` to run the mysql engine with phpmyadmin dashboard.
+2. execute `composer install` in the plugin root folder.
+3. cd inside `tests/Application` then execute `yarn install` and `yarn build`.
+4. edit `tests/Application/.env` to have the correct env variables. **[basic .env](https://github.com/Sylius/PluginSkeleton/blob/1.12/tests/Application/.env)** + **[plugin based .env](https://github.com/aa-ahmed-aa/SyliusBotPlugin#installation)**
+5. exec `bin/console sylius:install --no-interaction` follow the guide to fix any issue(timezone enabled plugins, etc).
+6. exec `bin/console doctrine:schema:update --no-interaction --force`
+7. exec `bin/console sylius:fixtures:load --no-interaction`
+8. exec `symfony server:start --port=9090` and open `http:localhost:9090`
+9. exec `ngrok http 9090` and update the `APP_URL` in .env with the https link.
+    sometimes ngrok is not setting the correct headers for the webhook to work properly you can use this command instead `ngrok http https://localhost:9090 --host-header="localhost:9090"`
 ### Running plugin tests
 
   - PHPUnit

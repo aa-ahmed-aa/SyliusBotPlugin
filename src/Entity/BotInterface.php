@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Entity;
+namespace SyliusBotPlugin\Entity;
 
 
 use Sylius\Component\Resource\Model\ResourceInterface;
@@ -37,7 +37,7 @@ interface BotInterface extends ResourceInterface
     /**
      * @param string $paige_access_token
      */
-    public function setPaigeAccessToken(string $paige_access_token): void;
+    public function setPageAccessToken(string $paige_access_token): void;
 
     /**
      * @return mixed
@@ -55,14 +55,14 @@ interface BotInterface extends ResourceInterface
     public function getPageImageUrl();
 
     /**
-     * @param string $disabled
+     * @param bool $disabled
      */
-    public function setDisabled(string $disabled): void;
+    public function setDisabled(bool $disabled): void;
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getDisabled();
+    public function getDisabled(): bool;
 
     /**
      * @param string $channel_type
@@ -83,4 +83,14 @@ interface BotInterface extends ResourceInterface
      * @return mixed
      */
     public function getTimezone();
+
+    /**
+     * @param string $persistent_menu
+     */
+    public function setPersistentMenu(string $persistent_menu): void;
+
+    /**
+     * @return string
+     */
+    public function getPersistentMenu(): string;
 }

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Controller;
+namespace SyliusBotPlugin\Controller;
 
-use Ahmedkhd\SyliusBotPlugin\Service\FacebookMessengerService;
+use SyliusBotPlugin\Service\FacebookMessengerService;
 use Psr\Log\LoggerInterface;
 use Sylius\Component\Channel\Context\ChannelContextInterface;
 use Sylius\Component\Channel\Repository\ChannelRepositoryInterface;

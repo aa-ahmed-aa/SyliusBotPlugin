@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Service;
+namespace SyliusBotPlugin\Service;
 
-
-use Ahmedkhd\SyliusBotPlugin\Entity\BotSubscriberInterface;
+use SyliusBotPlugin\Entity\Bot;
+use SyliusBotPlugin\Entity\BotSubscriberInterface;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\Drivers\Facebook\Extensions\ButtonTemplate;
 use BotMan\Drivers\Facebook\Extensions\ReceiptTemplate;
@@ -64,11 +64,10 @@ interface BotServiceInterface
     public function wrapProductsForCart(iterable $orderItems, $pageNo = 1): array;
 
     /**
-     * @param array $menuItems
-     * @return Response
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @param array $persistentMenuItems
+     * @return array
      */
-    public function updatePersistentMenu($menuItems = []): Response;
+    public function getPersistentMenuItems(array $persistentMenuItems = []): array;
 
     /**
      * @param array|OutgoingMessage|ButtonTemplate|ReceiptTemplate $message
@@ -81,9 +80,9 @@ interface BotServiceInterface
      * @param string $url
      * @param array $body
      * @param string $method
-     * @return mixed
+     * @return ResponseInterface
      */
-    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET);
+    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET): ResponseInterface;
 
     /**
      * @param array $body
@@ -100,4 +99,5 @@ interface BotServiceInterface
      * Set Current Active Bot Order
      */
     public function setCurrentActiveOrder(): void;
+
 }

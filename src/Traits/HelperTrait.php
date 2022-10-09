@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Traits;
+namespace SyliusBotPlugin\Traits;
 
 use Exception;
 
 trait HelperTrait
 {
     /**
-     * @param string $string
-     * @return boolean
+     * @param string $content
+     * @return bool
      */
-    public function  isJson(string $string) {
-        \GuzzleHttp\json_decode($string);
+    public function  isJson(string $content) {
+        json_decode($content);
         return json_last_error() === JSON_ERROR_NONE;
     }
 

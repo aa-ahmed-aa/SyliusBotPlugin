@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Tests\Ahmedkhd\SyliusBotPlugin\Application\Kernel;
+use Tests\SyliusBotPlugin\Application\Kernel;
 use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\HttpFoundation\Request;
 

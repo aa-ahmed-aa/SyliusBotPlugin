@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Entity;
+namespace SyliusBotPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -11,7 +11,7 @@ use Sylius\Component\Core\Model\CustomerInterface;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="ahmedkhd_sylius_bot_subscriber")
+ * @ORM\Table(name="sylius_bot_plugin_bot_subscriber")
  */
 class BotSubscriber implements BotSubscriberInterface
 {

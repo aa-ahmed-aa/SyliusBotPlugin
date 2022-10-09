@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
-namespace Ahmedkhd\SyliusBotPlugin\DependencyInjection;
+namespace SyliusBotPlugin\DependencyInjection;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-final class AhmedkhdSyliusBotExtension extends Extension
+final class SyliusBotExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
     {

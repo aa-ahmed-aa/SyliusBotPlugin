@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Ahmedkhd\SyliusBotPlugin\Entity;
+namespace SyliusBotPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="ahmedkhd_sylius_bot")
+ * @ORM\Table(name="sylius_bot_plugin_bot")
  */
 class Bot implements BotInterface
 {
@@ -31,6 +31,12 @@ class Bot implements BotInterface
 
     /**
      * @var string | null
+     * @ORM\Column(name="user_id", type="string", length=255, nullable=true)
+     */
+    protected $user_id;
+
+    /**
+     * @var string | null
      * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
      */
     protected $page_access_token;
@@ -43,13 +49,13 @@ class Bot implements BotInterface
 
     /**
      * @var string | null
-     * @ORM\Column(name="page_image_url", type="string", length=255, nullable=true)
+     * @ORM\Column(name="page_image_url", type="text", nullable=true)
      */
     protected $page_image_url;
 
     /**
-     * @var string | null
-     * @ORM\Column(name="disabled", type="boolean", options={"default": false})
+     * @var bool | null
+     * @ORM\Column(name="disabled", type="boolean", nullable=true, options={"default": false})
      */
     protected $disabled;
 
@@ -66,11 +72,27 @@ class Bot implements BotInterface
     protected $timezone;
 
     /**
-     * @return mixed
+     * @var string | null
+     * @ORM\Column(name="persistent_menu", type="text", nullable=true)
      */
-    public function getId()
+    protected $persistent_menu;
+
+    /** @var array $PERSISTENT_MENU_FALLBACK */
+    public const PERSISTENT_MENU_FALLBACK = [
+        "list_products" => "List products",
+        "order_summery" => "Order summery",
+        "my_cart" => "My cart",
+        "empty_cart" => "Empty cart",
+        "checkout" => "Checkout",
+        "get_started_text" => "Hello {{user_first_name}}!"
+    ];
+
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
-        return $this->id;
+        return (int)$this->id;
     }
 
     /**
@@ -82,11 +104,11 @@ class Bot implements BotInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPageName()
+    public function getPageName(): string
     {
-        return $this->page_name;
+        return (string)$this->page_name;
     }
 
     /**
@@ -98,27 +120,27 @@ class Bot implements BotInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPageId()
+    public function getPageId(): string
     {
-        return $this->page_id;
+        return (string)$this->page_id;
     }
 
     /**
      * @param string $page_access_token
      */
-    public function setPaigeAccessToken(string $page_access_token): void
+    public function setPageAccessToken(string $page_access_token): void
     {
         $this->page_access_token = $page_access_token;
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPageAccessToken()
+    public function getPageAccessToken(): string
     {
-        return $this->page_access_token;
+        return (string)$this->page_access_token;
     }
 
     /**
@@ -130,27 +152,27 @@ class Bot implements BotInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getPageImageUrl()
+    public function getPageImageUrl(): string
     {
-        return $this->page_image_url;
+        return (string)$this->page_image_url;
     }
 
     /**
-     * @param string $disabled
+     * @param bool $disabled
      */
-    public function setDisabled(string $disabled): void
+    public function setDisabled(bool $disabled): void
     {
         $this->disabled = $disabled;
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    public function getDisabled()
+    public function getDisabled(): bool
     {
-        return $this->disabled;
+        return (bool)$this->disabled;
     }
 
     /**
@@ -162,11 +184,11 @@ class Bot implements BotInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getChannelType()
+    public function getChannelType(): string
     {
-        return $this->channel_type;
+        return (string)$this->channel_type;
     }
 
     /**
@@ -178,10 +200,42 @@ class Bot implements BotInterface
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getTimezone()
+    public function getTimezone(): string
     {
-        return $this->timezone;
+        return (string)$this->timezone;
+    }
+
+    /**
+     * @param string $persistent_menu
+     */
+    public function setPersistentMenu(string $persistent_menu): void
+    {
+        $this->persistent_menu = $persistent_menu;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPersistentMenu(): string
+    {
+        return (string)$this->persistent_menu;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUserId(): ?string
+    {
+        return $this->user_id;
+    }
+
+    /**
+     * @param string|null $user_id
+     */
+    public function setUserId(?string $user_id): void
+    {
+        $this->user_id = $user_id;
     }
 }
