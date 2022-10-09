@@ -126,9 +126,9 @@ jobs:
                     restore-keys: |
                         ${{ runner.os }}-node-${{ matrix.node }}-yarn-
 
-#            -
-#                name: Install JS dependencies
-#                run: (cd tests/Application && yarn install)
+            -
+                name: Install JS dependencies
+                run: (cd tests/Application && yarn install)
 
             -
                 name: Prepare test application database

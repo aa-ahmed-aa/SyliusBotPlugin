@@ -377,7 +377,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
      * @return ResponseInterface
      * @throws GuzzleException
      */
-    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET)
+    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET): ResponseInterface
     {
         try {
             return $this->httpClient->request(

@@ -66,8 +66,12 @@ class BotConfigurationService extends AbstractFacebookMessengerBotService
             /** @var RepositoryInterface $botRepository */
             $botRepository = $this->getBotRepository();
 
-            /** @var BotInterface $bot */
+            /** @var BotInterface | null $bot */
             $bot = $botRepository->findOneBy([]);
+        }
+
+        if ($bot === null) {
+            return "";
         }
 
         $persistentMenuJson = $bot->getPersistentMenu();

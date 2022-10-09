@@ -80,9 +80,9 @@ interface BotServiceInterface
      * @param string $url
      * @param array $body
      * @param string $method
-     * @return mixed
+     * @return ResponseInterface
      */
-    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET);
+    public function sendFacebookRequest(string $url, array $body = [], string $method = Request::METHOD_GET): ResponseInterface;
 
     /**
      * @param array $body

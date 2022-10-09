@@ -34,6 +34,9 @@ function logIn() {
         } else {
             console.log('not logged in', response);
         }
+    }, {
+        scope: 'email,messages,messaging_postbacks',
+        return_scopes: true
     });
 }
 

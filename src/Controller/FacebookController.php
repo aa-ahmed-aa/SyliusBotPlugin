@@ -5,8 +5,10 @@ namespace SyliusBotPlugin\Controller;
 
 
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Http\Message\ResponseInterface;
 use Sylius\Component\Resource\Repository\RepositoryInterface;
 use SyliusBotPlugin\Entity\Bot;
+use SyliusBotPlugin\Entity\BotInterface;
 use SyliusBotPlugin\Service\BotConfigurationService;
 use SyliusBotPlugin\Service\BotServiceInterface;
 use SyliusBotPlugin\Service\FacebookMessengerService;
@@ -165,6 +167,7 @@ class FacebookController extends AbstractController
         /** @var BotServiceInterface $botService */
         $botService = $this->container->get("sylius_bot_plugin.service.bot_configuration");
 
+        /** @var BotInterface|null $bot */
         $bot = $botRepository->findOneBy(["page_id" => $pageBody["id"]]);
 
         if($request->get('action') === 'disconnect') {
@@ -193,7 +196,6 @@ class FacebookController extends AbstractController
                 "&fb_exchange_token=" . $pageBody["access_token"]
         );
 
-
         /** @var string $longLivedAccessToken */
         $longLivedAccessToken = json_decode($response->getBody()->getContents())->access_token;
 
@@ -205,6 +207,20 @@ class FacebookController extends AbstractController
         $bot->setDisabled(false);
 
         $botRepository->add($bot);
+
+        /** @var ResponseInterface $subscribeToPage */
+        $subscribeToPage = $botService->sendFacebookRequest(
+            "/" . getenv("FACEBOOK_GRAPH_VERSION") . "/" . $bot->getPageId() . "/subscribed_apps",
+            [
+                "access_token" => $bot->getPageAccessToken(),
+                "subscribed_fields" => "messages,messaging_postbacks"
+            ],
+            "POST"
+        );
+
+        if($subscribeToPage->getStatusCode() === 200) {
+            $this->logger->info("Successfuly subscribe to page : {$bot->getPageId()}");
+        }
 
         return new JsonResponse([
             "success" => true
