@@ -13,6 +13,11 @@
     </a>
 </p>
 
+### !!!! :warning: Sylius Version Support
+
+- `master` branch supports sylius version 1.8 & 1.9
+- `1.12` branch supports sylius version 1.12
+
 ## Screenshots
 <details>
 
