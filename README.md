@@ -52,17 +52,26 @@
     ```yml
     imports:
         # ...
-        - { resource: '@SyliusBotPlugin/config/app/config.yml' }
+        - { resource: '@SyliusBotPlugin/config/config.yml' }
     
     ```
 
 4. Import routes inside your routes.yml
     ```yml
+    sylius_bot_plugin_admin:
+        resource: "@SyliusBotPlugin/config/admin_routing.yml"
+        prefix: /admin
+
     sylius_bot_plugin_sylius_bot:
         resource: "@SyliusBotPlugin/config/routes.yml"
     ```
 
-5. Run `php bin/console doctrine:schema:update --force`
+5. Run ```shell
+    php bin/console doctrine:schema:update --force
+    yarn build
+    bin/console assets:install
+    bin/console cache:clear
+    ```
 
 6. Start ngrok with  `ngrok http 80` 
 
