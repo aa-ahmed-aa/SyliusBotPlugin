@@ -1,122 +1,80 @@
+<h1 align="center">
+    <img width="100" height="100" src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/logo.png" />
+    <p>
+    Sylius Bot Plugin
+    </p>
+</h1>
+
+<p align="center">Facebook messenger shopping for sylius to give your store a new shoping experience</p>
+
 <p align="center">
     <a href="https://sylius.com" target="_blank">
-        <img src="https://demo.sylius.com/assets/shop/img/logo.png" />
+        <img src="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/resources/demo_gif.gif" />
     </a>
 </p>
 
-<h1 align="center">Plugin Skeleton</h1>
+## Screenshots
+<details>
 
-<p align="center">Skeleton for starting Sylius plugins.</p>
+![Screenshot](docs/resources/screen_2.png)
+![Screenshot](docs/resources/screen_1.png)
+![Screenshot](docs/resources/screen_3.png)
 
-## Documentation
+</details>
 
-For a comprehensive guide on Sylius Plugins development please go to Sylius documentation,
-there you will find the <a href="https://docs.sylius.com/en/latest/plugin-development-guide/index.html">Plugin Development Guide</a>, that is full of examples.
+## Pre-installation
+- [create facebook app](https://developers.facebook.com/docs/development/create-an-app/) and add messenger product to your app 
 
-## Quickstart Installation
+- [download ngrok](https://ngrok.com/download)
 
-### Traditional
+## Installation
+1. Install using composer 
+    ```bash 
+    composer require ahmedkhd/sylius-bot-plugin
+    ```
+2. Add this to .env
+    ```dotenv
+    APP_URL=<ngrok-link>
+    FACEBOOK_APP_ID=<fb-app-id>
+    FACEBOOK_APP_SECRET=<fb-app-secret>
+    FACEBOOK_GRAPH_URL=<fb-graph-url>
+    FACEBOOK_GRAPH_VERSION=<fb-app-version | v15.0>
+    FACEBOOK_VERIFICATION=<you-personal-verify-token | sylius>
+    ```
+    > Note : feel free to change the FACEBOOK_VERIFICATION token as you need (this value will be used via facebook to verify the webhook).
 
-1. Run `composer create-project sylius/plugin-skeleton ProjectName`.
-
-2. From the plugin skeleton root directory, run the following commands:
-
-    ```bash
-    $ (cd tests/Application && yarn install)
-    $ (cd tests/Application && yarn build)
-    $ (cd tests/Application && APP_ENV=test bin/console assets:install public)
+3. Add the following import to `_sylius.yaml`:
+    ```yml
+    imports:
+        # ...
+        - { resource: '@SyliusBotPlugin/config/app/config.yml' }
     
-    $ (cd tests/Application && APP_ENV=test bin/console doctrine:database:create)
-    $ (cd tests/Application && APP_ENV=test bin/console doctrine:schema:create)
     ```
 
-To be able to set up a plugin's database, remember to configure you database credentials in `tests/Application/.env` and `tests/Application/.env.test`.
-
-### Docker
-
-1. Execute `docker compose up -d`
-
-2. Initialize plugin `docker compose exec app make init`
-
-3. See your browser `open localhost`
-
-## Usage
-
-### Running plugin tests
-
-  - PHPUnit
-
-    ```bash
-    vendor/bin/phpunit
+4. Import routes inside your routes.yml
+    ```yml
+    sylius_bot_plugin_sylius_bot:
+        resource: "@SyliusBotPlugin/config/routes.yml"
     ```
 
-  - PHPSpec
+5. Run `php bin/console doctrine:schema:update --force`
 
-    ```bash
-    vendor/bin/phpspec run
+6. Start ngrok with  `ngrok http 80` 
+
+   warn : sometimes there is an issue with facebook and can't accepts ngrok requests sometimes using this command helps `ngrok http https://localhost:80 --host-header="localhost:80"`
+
+7. open Developers facebook platform > Messenger > Settings
+    ```dotenv
+    Callback URL : <NGROK_LINK>/webhook/messenger
+    Verify Token : value of this env FACEBOOK_VERIFICATION
     ```
 
-  - Behat (non-JS scenarios)
+8. login to sylius admin dashboard and got to `Messenger` tab and click on `Facebook Login` button and choose your pages 
+9. go to second tab `Persistent Menu` and update your bot persistent menu and getting started button message
+   > IMPORTANT every bot should have persistent menu to fulfill the shopping experience on messenger
 
-    ```bash
-    vendor/bin/behat --strict --tags="~@javascript"
-    ```
+10. That's it :smile: open your page and start talking to you bot :tada:
 
-  - Behat (JS scenarios)
- 
-    1. [Install Symfony CLI command](https://symfony.com/download).
- 
-    2. Start Headless Chrome:
-    
-      ```bash
-      google-chrome-stable --enable-automation --disable-background-networking --no-default-browser-check --no-first-run --disable-popup-blocking --disable-default-apps --allow-insecure-localhost --disable-translate --disable-extensions --no-sandbox --enable-features=Metal --headless --remote-debugging-port=9222 --window-size=2880,1800 --proxy-server='direct://' --proxy-bypass-list='*' http://127.0.0.1
-      ```
-    
-    3. Install SSL certificates (only once needed) and run test application's webserver on `127.0.0.1:8080`:
-    
-      ```bash
-      symfony server:ca:install
-      APP_ENV=test symfony server:start --port=8080 --dir=tests/Application/public --daemon
-      ```
-    
-    4. Run Behat:
-    
-      ```bash
-      vendor/bin/behat --strict --tags="@javascript"
-      ```
-    
-  - Static Analysis
-  
-    - Psalm
-    
-      ```bash
-      vendor/bin/psalm
-      ```
-      
-    - PHPStan
-    
-      ```bash
-      vendor/bin/phpstan analyse -c phpstan.neon -l max src/  
-      ```
 
-  - Coding Standard
-  
-    ```bash
-    vendor/bin/ecs check
-    ```
-
-### Opening Sylius with your plugin
-
-- Using `test` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=test bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=test bin/console server:run -d public)
-    ```
-    
-- Using `dev` environment:
-
-    ```bash
-    (cd tests/Application && APP_ENV=dev bin/console sylius:fixtures:load)
-    (cd tests/Application && APP_ENV=dev bin/console server:run -d public)
-    ```
+## Contribution
+- [Contribution Guide](https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/master/docs/CUSTOMIZATION.md)
