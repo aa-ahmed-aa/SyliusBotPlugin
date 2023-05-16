@@ -1,0 +1,6 @@
+sylius_bot_plugin_admin:
+    resource: "@SyliusBotPlugin/config/admin_routing.yml"
+    prefix: /admin
+
+sylius_bot_plugin_sylius_bot:
+    resource: "@SyliusBotPlugin/config/routes.yml"

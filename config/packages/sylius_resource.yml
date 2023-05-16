@@ -1,0 +1,8 @@
+sylius_resource:
+    resources:
+        sylius_bot_plugin.bot:
+            classes:
+                model: SyliusBotPlugin\Entity\Bot
+        sylius_bot_plugin.bot_subscriber:
+            classes:
+                model: SyliusBotPlugin\Entity\BotSubscriber

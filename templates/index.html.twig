@@ -1,0 +1,10 @@
+{% extends '@SyliusAdmin/layout.html.twig' %}
+
+{% block content %}
+    <div id="greeting">This is Messenger page <br></div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+        {% include '@SyliusUi/_javascripts.html.twig' with {'path': 'bundles/syliusbotplugin/facebook_connect.js'} %}
+{% endblock %}

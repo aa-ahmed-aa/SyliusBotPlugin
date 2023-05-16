@@ -1,0 +1,18 @@
+# Delete these routes and define your own shop routes here
+sylius_bot_plugin_sylius_bot_webhook_verify:
+    path: /webhook/messenger
+    methods: [GET]
+    defaults:
+        _controller: sylius_bot_plugin.controller.webhook::messengerWebhookVerification
+
+sylius_bot_plugin_sylius_bot_webhook:
+    path: /webhook/messenger
+    methods: [POST]
+    defaults:
+        _controller: sylius_bot_plugin.controller.webhook::messengerWebhook
+
+sylius_bot_plugin_sylius_bot_checkout:
+    path: /bot_checkout/{cartToken}
+    methods: [GET]
+    defaults:
+        _controller: sylius_bot_plugin.controller.webhook::botCheckout

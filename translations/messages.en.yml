@@ -1,0 +1,27 @@
+sylius_bot_plugin:
+    bot:
+        page_name: Page Name
+        page_id: FaceBook Page ID
+        disabled: Disabled
+        timezone: Timezone
+    ui:
+        new_bot: New Bot
+        edit_bot: Edit Bot
+        bots: Bots
+        bot_subscribers: Bot Users
+        edit_bot_subscriber: Edit Bot User
+    
+    bot_subscriber:
+        users: Bot Users
+        name: Name
+        first_name: First Name
+        last_name: Last Name
+        profile_picture: Profile picture
+        locale: Locale
+        timezone: Timezone
+        gender: Gender
+        male: Male
+        female: Female
+        channel: Channel
+        messenger: Messenger
+        telegram: Telegram

@@ -1,0 +1,4 @@
+suites:
+    main:
+        namespace: SyliusBotPlugin\SyliusBotPlugin
+        psr4_prefix: SyliusBotPlugin\SyliusBotPlugin

@@ -1,0 +1,5 @@
+twig:
+    globals:
+        FACEBOOK_APP_ID: "%env(FACEBOOK_APP_ID)%"
+        FACEBOOK_GRAPH_URL: "%env(FACEBOOK_GRAPH_URL)%"
+        FACEBOOK_GRAPH_VERSION: "%env(FACEBOOK_GRAPH_VERSION)%"
