@@ -76,7 +76,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
          */
         $this->logger = $logger;
         $this->serializer = $serializer;
-        $this->baseUrl = $this->getEnvironment('APP_URL');
+        $this->baseUrl = 'https://'.$_SERVER['HTTP_HOST'];
         $this->defaultLocaleCode = $localContext->getLocaleCode();
         /**
          * @psalm-suppress PropertyTypeCoercion
@@ -452,30 +452,16 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
             $botSubscriber = $this->createBotSubscriber($subscriberData, $customer);
         }
 
-        $this->user = $botSubscriber;
-        $this->setCurrentActiveOrder();
+        $this->setCurrentActiveOrder($botSubscriber);
+        $this->botSubscriber = $botSubscriber;
     }
 
     /**
      * Set Current Active Bot Order
      */
-    public function setCurrentActiveOrder(): void
+    public function setCurrentActiveOrder(?BotSubscriberInterface $botSubscriber): void
     {
-        $notCompletedOrder = $this->user->getCustomer()->getOrders()->filter(function (OrderInterface $order): bool {
-            return !$order->isCheckoutCompleted();
-        });
-
-        if(
-            $this->user->getCustomer()->getOrders()->isEmpty() ||
-            $notCompletedOrder->isEmpty()
-        ) {
-            $this->order = $this->createCart($this->user->getCustomer());
-        } else if(!$notCompletedOrder->isEmpty()) {
-            $order = $notCompletedOrder->first();
-            if($order != false) {
-                $this->order  = $order;
-            }
-        }
+        $this->order = $this->createCart($botSubscriber->getCustomer());
     }
 
     /**

@@ -106,12 +106,12 @@ interface BotSubscriberInterface extends ResourceInterface
     public function getChannel(): ?string;
 
     /**
-     * @param CustomerInterface $customer
+     * @param CustomerInterface|null $customer
      */
-    public function setCustomer(CustomerInterface $customer): void;
+    public function setCustomer(?CustomerInterface $customer): void;
 
     /**
-     * @return CustomerInterface
+     * @return CustomerInterface|null
      */
-    public function getCustomer(): CustomerInterface;
+    public function getCustomer(): ?CustomerInterface;
 }

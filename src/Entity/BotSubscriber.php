@@ -6,7 +6,6 @@ namespace SyliusBotPlugin\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
 
 /**
@@ -80,18 +79,11 @@ class BotSubscriber implements BotSubscriberInterface
     public $gender;
 
     /**
-     * @var CustomerInterface
-     * @ORM\OneToOne(targetEntity="Sylius\Component\Core\Model\Customer")
+     * @var CustomerInterface|null
+     * @ORM\OneToOne(targetEntity="Sylius\Component\Customer\Model\CustomerInterface")
      * @ORM\JoinColumn(name="customer_id", referencedColumnName="id")
      */
     public $customer;
-
-    public function __construct()
-    {
-        $this->customer = new Customer();
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
-    }
 
     /**
      * @return mixed
@@ -246,9 +238,9 @@ class BotSubscriber implements BotSubscriberInterface
     }
 
     /**
-     * @param CustomerInterface $customer
+     * @param CustomerInterface|null $customer
      */
-    public function setCustomer(CustomerInterface $customer): void
+    public function setCustomer(?CustomerInterface $customer): void
     {
         $this->customer = $customer;
     }
@@ -256,7 +248,7 @@ class BotSubscriber implements BotSubscriberInterface
     /**
      * @return CustomerInterface
      */
-    public function getCustomer(): CustomerInterface
+    public function getCustomer(): ?CustomerInterface
     {
         return $this->customer;
     }

@@ -98,6 +98,5 @@ interface BotServiceInterface
     /**
      * Set Current Active Bot Order
      */
-    public function setCurrentActiveOrder(): void;
-
+    public function setCurrentActiveOrder(?BotSubscriberInterface $botSubscriber): void;
 }
