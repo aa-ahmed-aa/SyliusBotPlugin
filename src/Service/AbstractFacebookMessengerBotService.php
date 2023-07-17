@@ -285,7 +285,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
         $menuItems[] = [
             "type" => "web_url",
             "title" => "Go to website",
-            "url" => $envs['APP_URL'],
+            "url" => $this->baseUrl,
             "webview_height_ratio" => "full",
         ];
 

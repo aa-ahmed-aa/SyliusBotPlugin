@@ -300,7 +300,7 @@ class FacebookMessengerService extends AbstractFacebookMessengerBotService
         $this->sendMessage(
             ButtonTemplate::create("Are you sure you want to checkout 🛒?")
                 ->addButton(ElementButton::create("Checkout")
-                    ->url($this->getEnvironment("APP_URL")  . $checkoutUrl)
+                    ->url($this->baseUrl . $checkoutUrl)
                 )
                 ->addButton(ElementButton::create("Continue shopping")
                     ->type('postback')

@@ -68,7 +68,7 @@ abstract class AbstractBotService extends AbstractService
     {
         /** @var RouterInterface $router */
         $router = $this->container->get("router");
-        return $this->getEnvironment("APP_URL") .
+        return $this->baseUrl .
             $router->generate("sylius_bot_plugin_sylius_bot_checkout", ['cartToken' => $this->order->getTokenValue()]);
     }
 
