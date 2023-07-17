@@ -14,7 +14,7 @@ use Sylius\Component\Core\Model\Channel;
 use Sylius\Component\Core\Model\ChannelInterface;
 use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
-use Sylius\Component\Core\Model\Order;
+use Sylius\Component\Order\Model\Order;
 use Sylius\Component\Core\Model\OrderInterface;
 use Sylius\Component\Core\Model\OrderItemInterface;
 use Sylius\Component\Core\Model\ProductImageInterface;
@@ -39,7 +39,7 @@ abstract class AbstractBotService extends AbstractService
     protected $order;
 
     /** @var BotSubscriberInterface */
-    protected $user;
+    protected $botSubscriber;
 
     /** @var string */
     protected $defaultLocaleCode;
@@ -57,9 +57,6 @@ abstract class AbstractBotService extends AbstractService
     public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
-        $this->order = new Order();
-        $this->user = new BotSubscriber();
-        $this->defaultChannel = new Channel();
         $this->defaultLocaleCode = "en_US";
     }
 
@@ -88,7 +85,7 @@ abstract class AbstractBotService extends AbstractService
      */
     public function getUser(): BotSubscriberInterface
     {
-        return $this->user;
+        return $this->botSubscriber;
     }
 
     /**
@@ -149,19 +146,26 @@ abstract class AbstractBotService extends AbstractService
         /** @var FactoryInterface $orderFactory */
         $orderFactory = $this->container->get("sylius.factory.order");
 
+        /** @var OrderRepositoryInterface $orderRepository */
+        $orderRepository = $this->container->get("sylius.repository.order");
+        $order = $orderRepository->findOneBy(['customer' => $customer->getId(), 'state' => 'cart']);
+
+        if(!empty($order)) {
+            return $order;
+        }
+
+        $orderFactory = $this->container->get("sylius.factory.order");
+
         /** @var OrderInterface $order */
         $order = $orderFactory->createNew();
 
         /** @var UniqueIdBasedOrderTokenAssigner */
         $uniqueIdBasedOrderTokenAssigner = $this->container->get('sylius.unique_id_based_order_token_assigner');
 
-        /** @var OrderRepositoryInterface $orderRepository */
-        $orderRepository = $this->container->get("sylius.repository.order");
-
         /** @var CurrencyInterface $baseCurrency */
         $baseCurrency = $this->defaultChannel->getBaseCurrency();
 
-        $order->setCustomer($customer ?? $this->user->getCustomer());
+        $order->setCustomer($customer ?? $this->botSubscriber->getCustomer());
         $order->setChannel($this->getDefaultChannel());
         $order->setLocaleCode($this->getDefaultLocaleCode());
         $order->setCurrencyCode($baseCurrency->getCode());
@@ -273,6 +277,8 @@ abstract class AbstractBotService extends AbstractService
         $orderItem->setVariant($variant);
 
         $orderItemQuantityModifier->modify($orderItem, $orderItem->getQuantity() + 1);
+        $this->container->get('sylius.order_processing.order_processor')->process($this->order);
+
 
         $orderItemRepository->add($orderItem);
 
