@@ -329,6 +329,7 @@ abstract class AbstractFacebookMessengerBotService extends AbstractBotService im
                 ]
             ]
         ];
+        $envs = array_merge($_ENV, getenv());
 
         $response = $this->sendFacebookRequest(
             "/" . $envs["FACEBOOK_GRAPH_VERSION"] . "/me/messenger_profile?access_token=" . $accessToken,
