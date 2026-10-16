@@ -1,0 +1,42 @@
+{% if orders is empty %}
+    <div class="empty">
+        <div class="empty-icon">{{ ux_icon('tabler:shopping-bag', {class: 'icon'}) }}</div>
+        <p class="empty-title">{{ 'sylius_bot.ui.no_orders'|trans }}</p>
+        <p class="empty-subtitle text-secondary">{{ (customer ? 'sylius_bot.ui.no_orders_hint' : 'sylius_bot.ui.no_customer')|trans }}</p>
+    </div>
+{% else %}
+    <div class="table-responsive">
+        <table class="table table-vcenter card-table">
+            <thead>
+                <tr>
+                    <th class="text-center">{{ 'sylius.ui.date'|trans }}</th>
+                    <th>{{ 'sylius.ui.number'|trans }}</th>
+                    <th>{{ 'sylius.ui.channel'|trans }}</th>
+                    <th>{{ 'sylius.ui.state'|trans }}</th>
+                    <th>{{ 'sylius.ui.payment_state'|trans }}</th>
+                    <th>{{ 'sylius.ui.shipping_state'|trans }}</th>
+                    <th class="text-end">{{ 'sylius.ui.total'|trans }}</th>
+                    <th class="w-1"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td>{% include '@SyliusAdmin/shared/grid/field/date.html.twig' with {data: order.checkoutCompletedAt ?? order.createdAt} only %}</td>
+                        <td>{% include '@SyliusAdmin/shared/grid/field/order_number.html.twig' with {data: order} only %}</td>
+                        <td>{% include '@SyliusAdmin/shared/grid/field/channel.html.twig' with {data: order.channel} only %}</td>
+                        <td>{% include '@SyliusAdmin/order/grid/field/order_state.html.twig' with {data: order.state} only %}</td>
+                        <td>{% include '@SyliusAdmin/order/grid/field/payment_state.html.twig' with {data: order.paymentState} only %}</td>
+                        <td>{% include '@SyliusAdmin/order/grid/field/shipping_state.html.twig' with {data: order.shippingState} only %}</td>
+                        <td class="text-end text-nowrap">{% include '@SyliusAdmin/order/grid/field/order_total.html.twig' with {data: order} only %}</td>
+                        <td>
+                            <a href="{{ path('sylius_admin_order_show', {id: order.id}) }}" class="btn btn-icon" data-bs-toggle="tooltip" data-bs-title="{{ 'sylius.ui.show'|trans }}" aria-label="{{ 'sylius.ui.show'|trans }}">
+                                {{ ux_icon('tabler:eye', {class: 'icon'}) }}
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}

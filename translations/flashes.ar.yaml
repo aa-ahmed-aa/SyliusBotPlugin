@@ -1,0 +1,11 @@
+sylius_bot:
+    ui:
+        flash:
+            not_configured: أضف FACEBOOK_APP_ID وFACEBOOK_APP_SECRET قبل ربط فيسبوك.
+            logged_in: تم تسجيل دخولك إلى فيسبوك. اختر الصفحات التي تريد ربطها.
+            login_first: سجّل الدخول باستخدام فيسبوك أولًا.
+            page_not_found: هذه الصفحة ليست من الصفحات التي يديرها حساب فيسبوك الخاص بك.
+            connected: أصبح الروبوت يرد على هذه الصفحة.
+            disconnected: تم فصل الصفحة.
+            repaired: تمت إعادة اشتراك الصفحة ونشر قائمتها.
+            settings_saved: تم حفظ الإعدادات ونشرها على ميتا.

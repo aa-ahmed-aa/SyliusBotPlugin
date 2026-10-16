@@ -4,93 +4,55 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Entity;
 
+use Sylius\Resource\Model\ResourceInterface;
+use Sylius\Resource\Model\TimestampableInterface;
 
-use Sylius\Component\Resource\Model\ResourceInterface;
-
-interface BotInterface extends ResourceInterface
+/**
+ * A connected Facebook Page (Messenger) or Instagram professional account.
+ */
+interface BotInterface extends ResourceInterface, TimestampableInterface
 {
-    /**
-     * @return mixed
-     */
-    public function getId();
+    public const CHANNEL_MESSENGER = 'messenger';
 
-    /**
-     * @param string $page_name
-     */
-    public function setPageName(string $page_name): void;
+    public const CHANNEL_INSTAGRAM = 'instagram';
 
-    /**
-     * @return mixed
-     */
-    public function getPageName();
+    public const CHANNELS = [self::CHANNEL_MESSENGER, self::CHANNEL_INSTAGRAM];
 
-    /**
-     * @param string $page_id
-     */
-    public function setPageId(string $page_id): void;
+    public function getPageName(): ?string;
 
-    /**
-     * @return mixed
-     */
-    public function getPageId();
+    public function setPageName(?string $pageName): void;
 
-    /**
-     * @param string $paige_access_token
-     */
-    public function setPageAccessToken(string $paige_access_token): void;
+    /** Facebook Page id for Messenger, Instagram account id for Instagram. */
+    public function getPageId(): ?string;
 
-    /**
-     * @return mixed
-     */
-    public function getPageAccessToken();
+    public function setPageId(?string $pageId): void;
 
-    /**
-     * @param string $page_image_url
-     */
-    public function setPageImageUrl(string $page_image_url): void;
+    public function getPageAccessToken(): ?string;
 
-    /**
-     * @return mixed
-     */
-    public function getPageImageUrl();
+    public function setPageAccessToken(?string $pageAccessToken): void;
 
-    /**
-     * @param bool $disabled
-     */
+    public function getPageImageUrl(): ?string;
+
+    public function setPageImageUrl(?string $pageImageUrl): void;
+
+    public function getChannelType(): ?string;
+
+    public function setChannelType(?string $channelType): void;
+
+    /** For Instagram: the Facebook Page the account is linked to. Webhooks are subscribed on it. */
+    public function getFacebookPageId(): ?string;
+
+    public function setFacebookPageId(?string $facebookPageId): void;
+
+    public function isDisabled(): bool;
+
     public function setDisabled(bool $disabled): void;
 
-    /**
-     * @return bool
-     */
-    public function getDisabled(): bool;
+    /** @return array<string, string> */
+    public function getSettings(): array;
 
-    /**
-     * @param string $channel_type
-     */
-    public function setChannelType(string $channel_type): void;
+    /** @param array<string, string|null> $settings */
+    public function setSettings(array $settings): void;
 
-    /**
-     * @return mixed
-     */
-    public function getChannelType();
-
-    /**
-     * @param string $timezone
-     */
-    public function setTimezone(string $timezone): void;
-
-    /**
-     * @return mixed
-     */
-    public function getTimezone();
-
-    /**
-     * @param string $persistent_menu
-     */
-    public function setPersistentMenu(string $persistent_menu): void;
-
-    /**
-     * @return string
-     */
-    public function getPersistentMenu(): string;
+    public function getSetting(string $key): string;
 }

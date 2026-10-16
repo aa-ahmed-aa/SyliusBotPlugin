@@ -1,0 +1,147 @@
+sylius_bot:
+    menu:
+        bots: Chat bots
+        messenger: Messenger
+        instagram: Instagram
+        subscribers: Bot users
+
+    ui:
+        messenger: Messenger
+        instagram: Instagram
+        messenger_subtitle: Let customers browse your products, fill a cart and check out from your Facebook Page's inbox.
+        instagram_subtitle: Let customers browse your products, fill a cart and check out from Instagram Direct.
+        bot_subscribers: Bot users
+        picture: Picture
+        name: Name
+        channel: Channel
+        first_name: First name
+        last_name: Last name
+        platform_id: Platform ID
+        page: Page
+        locale: Locale
+        timezone: Time zone
+        first_message: First message
+        store: Store
+        view_customer: View customer
+        conversation: Conversation
+        no_messages: No messages yet
+        no_messages_hint: Messages this user sends to your page, and the bot's replies, will appear here.
+        no_orders: No orders yet
+        no_orders_hint: Orders this user places will appear here.
+        no_customer: This user is not linked to a customer yet.
+
+        continue_with_facebook: Continue with Facebook
+        logged_in_as: 'Logged in to Facebook as %name%'
+        log_out: Log out of Facebook
+        connect: Connect
+        disconnect: Disconnect
+        repair: Repair
+        connected_badge: Connected
+        confirm_disconnect: The bot will stop answering on this page. Continue?
+        facebook_error: Facebook could not list your pages
+        linked_to_page: 'Linked to the Facebook Page %page%'
+        no_instagram_linked: No Instagram professional account is linked to this Page.
+        how_to_link_instagram: How to link an account
+        login_to_list: Log in with Facebook to see your pages
+        login_to_list_hint:
+            messenger: Use a Facebook account that is an admin of the Page you want to sell from.
+            instagram: Instagram accounts are connected through the Facebook Page they are linked to. Use a Facebook account that is an admin of that Page.
+
+        account_id:
+            messenger: Page ID
+            instagram: Instagram account ID
+
+        connected:
+            messenger: Connected Pages
+            instagram: Connected Instagram accounts
+        available:
+            messenger: Your Facebook Pages
+            instagram: Your Instagram accounts
+        none_connected:
+            messenger: No Page is connected yet
+            instagram: No Instagram account is connected yet
+        none_connected_hint:
+            messenger: Connect one of your Facebook Pages below and the bot starts answering its messages.
+            instagram: Connect one of your Instagram professional accounts below and the bot starts answering its Direct messages.
+
+        delivery:
+            ok: Receiving messages
+            ok_help: Meta delivers this page's messages to your store.
+            token_invalid: Reconnect needed
+            token_invalid_help: Facebook no longer accepts this page's access. This happens when the app is removed from the Page or the admin's password changes. Log in with Facebook and connect the page again.
+            not_subscribed: Not receiving messages
+            not_subscribed_help: The page is connected but Meta is not sending its messages to the store. Use Repair to subscribe it again.
+            unknown: Status unknown
+            unknown_help: Facebook could not be asked about this page right now.
+
+        no_pages:
+            title: Facebook lists no Pages for this account
+            body: '%name% is logged in, but Facebook returned no Page it can manage.'
+            step1: Make sure this Facebook account is an admin of the Page, not just of a Business portfolio that owns it.
+            step2: Log out of Facebook here and log in again, and select the Pages when Facebook asks which ones to share.
+            step3: If the app was removed from the account, open Business integrations and remove it, then log in again.
+            business_integrations: Open Business integrations
+
+        not_configured:
+            title: The Meta app is not configured
+            body: Set your Meta app's credentials in the environment of the store, then reload this page.
+
+        setup:
+            title: Meta app setup
+            intro:
+                messenger: In your Meta app, add the Messenger product, then use these values.
+                instagram: In your Meta app, add Instagram (Messenger API for Instagram), then use these values.
+            callback_url: Webhook callback URL
+            callback_url_help:
+                messenger: 'Subscribe the "page" object to the messages and messaging_postbacks fields. Use your FACEBOOK_VERIFICATION value as the verify token.'
+                instagram: 'Subscribe the "instagram" object to the messages and messaging_postbacks fields. Use your FACEBOOK_VERIFICATION value as the verify token.'
+            redirect_uri: Valid OAuth redirect URI
+            redirect_uri_help: Add it under Facebook Login › Settings so "Continue with Facebook" can come back here.
+            guide: Step-by-step setup guide
+
+        settings:
+            title: Bot settings
+            menu: Menu
+            selling: Selling
+            greeting: Greeting
+            greeting_help: 'Shown before the first message. {{user_first_name}} is replaced with the customer''s first name. Up to 160 characters.'
+            greeting_help_instagram: 'Sent when a customer says hi or taps Get started. {{user_first_name}} is replaced with the customer''s name.'
+            list_products: '"Products" button'
+            my_cart: '"My cart" button'
+            empty_cart: '"Empty cart" button'
+            checkout: '"Checkout" button'
+            channel: Sales channel
+            channel_help: Products, prices and the checkout link come from this channel.
+            channel_default: The store's first enabled channel
+            ai_instructions: Instructions for the AI assistant
+            ai_instructions_help: Only used when an AI reply generator is installed. Describe tone, language and what the assistant may talk about.
+            preview: Preview
+            save: Save and publish
+
+    chat:
+        fallback: "Sorry, I didn't understand that. How can I help you?"
+        tap_an_option: 'Or tap an option:'
+        text_commands: 'Type "products" to browse, "cart" to see your cart or "checkout" to pay.'
+        browse_products: Browse products
+        view_cart: My cart
+        visit_website: Visit website
+        no_products: No products are available right now.
+        product_not_found: Sorry, this product is no longer available.
+        cannot_add: 'Sorry, %product% cannot be added right now. It may be out of stock.'
+        added_to_cart: '%product% was added to your cart 🛒'
+        removed_from_cart: '%product% was removed from your cart.'
+        item_not_found: That item is no longer in your cart.
+        cart_empty: Your cart is empty.
+        cart_cleared: Your cart is now empty.
+        checkout_prompt: 'Ready to check out? Your total is %total%.'
+        checkout_button: Checkout
+        continue_shopping: Keep shopping
+        nothing_in_stock: "Sorry, I don't have anything matching that in stock right now 🙏"
+        add_to_cart: Add to cart
+        choose_options: Choose options
+        view_on_website: View on website
+        remove_from_cart: Remove
+        see_more: See more
+        cart_item_subtitle: '%quantity% × · %price%'
+        products_heading: 'Our products:'
+        products_more: 'Type "products %page%" for more.'

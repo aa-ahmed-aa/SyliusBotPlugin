@@ -1,0 +1,4 @@
+<a class="fw-medium" href="{{ path('sylius_bot_admin_bot_subscriber_show', {id: data.id}) }}">{{ data.displayName }}</a>
+{% if data.bot %}
+    <div class="text-secondary small">{{ data.bot.pageName }}</div>
+{% endif %}

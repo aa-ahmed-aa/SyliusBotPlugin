@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <mapped-superclass name="SyliusBotPlugin\Entity\BotSubscriber" table="sylius_bot_plugin_bot_subscriber">
+        <id name="id" column="id" type="integer">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="botSubscriberId" column="bot_subscriber_id" type="string" length="191" unique="true"/>
+        <field name="channel" column="channel" type="string" length="32"/>
+        <field name="name" column="name" type="string" length="255" nullable="true"/>
+        <field name="firstName" column="first_name" type="string" length="255" nullable="true"/>
+        <field name="lastName" column="last_name" type="string" length="255" nullable="true"/>
+        <!-- Meta's signed CDN picture URLs routinely exceed 255 characters. -->
+        <field name="profilePicture" column="profile_picture" type="text" nullable="true"/>
+        <field name="locale" column="locale" type="string" length="255" nullable="true"/>
+        <field name="timezone" column="timezone" type="string" length="255" nullable="true"/>
+        <field name="gender" column="gender" type="string" length="255" nullable="true"/>
+
+        <field name="createdAt" column="created_at" type="datetime" nullable="true">
+            <gedmo:timestampable on="create"/>
+        </field>
+        <field name="updatedAt" column="updated_at" type="datetime" nullable="true">
+            <gedmo:timestampable on="update"/>
+        </field>
+
+        <many-to-one field="bot" target-entity="SyliusBotPlugin\Entity\BotInterface">
+            <join-column name="bot_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </many-to-one>
+
+        <one-to-one field="customer" target-entity="Sylius\Component\Customer\Model\CustomerInterface">
+            <join-column name="customer_id" referenced-column-name="id" nullable="true" on-delete="SET NULL"/>
+        </one-to-one>
+    </mapped-superclass>
+</doctrine-mapping>

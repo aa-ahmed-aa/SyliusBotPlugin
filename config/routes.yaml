@@ -1,0 +1,10 @@
+# Import this file from your application, e.g. in config/routes/sylius_bot.yaml:
+#
+#   sylius_bot:
+#       resource: "@SyliusBotPlugin/config/routes.yaml"
+
+sylius_bot_admin:
+    resource: "routes/admin.yaml"
+
+sylius_bot_shop:
+    resource: "routes/shop.yaml"

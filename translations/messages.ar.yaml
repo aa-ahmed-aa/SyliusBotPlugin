@@ -1,0 +1,147 @@
+sylius_bot:
+    menu:
+        bots: روبوتات المحادثة
+        messenger: ماسنجر
+        instagram: انستجرام
+        subscribers: مستخدمو الروبوت
+
+    ui:
+        messenger: ماسنجر
+        instagram: انستجرام
+        messenger_subtitle: دع عملاءك يتصفحون منتجاتك ويملؤون السلة ويتمّون الشراء من صندوق رسائل صفحتك على فيسبوك.
+        instagram_subtitle: دع عملاءك يتصفحون منتجاتك ويملؤون السلة ويتمّون الشراء من رسائل انستجرام.
+        bot_subscribers: مستخدمو الروبوت
+        picture: الصورة
+        name: الاسم
+        channel: القناة
+        first_name: الاسم الأول
+        last_name: الاسم الأخير
+        platform_id: معرّف المنصة
+        page: الصفحة
+        locale: اللغة
+        timezone: المنطقة الزمنية
+        first_message: أول رسالة
+        store: المتجر
+        view_customer: عرض العميل
+        conversation: المحادثة
+        no_messages: لا توجد رسائل بعد
+        no_messages_hint: ستظهر هنا الرسائل التي يرسلها هذا المستخدم إلى صفحتك وردود الروبوت عليها.
+        no_orders: لا توجد طلبات بعد
+        no_orders_hint: ستظهر هنا الطلبات التي يقدمها هذا المستخدم.
+        no_customer: هذا المستخدم غير مرتبط بعميل بعد.
+
+        continue_with_facebook: المتابعة باستخدام فيسبوك
+        logged_in_as: 'مسجّل الدخول إلى فيسبوك باسم %name%'
+        log_out: تسجيل الخروج من فيسبوك
+        connect: ربط
+        disconnect: فصل
+        repair: إصلاح
+        connected_badge: مربوطة
+        confirm_disconnect: سيتوقف الروبوت عن الرد على هذه الصفحة. هل تريد المتابعة؟
+        facebook_error: تعذّر على فيسبوك عرض صفحاتك
+        linked_to_page: 'مرتبط بصفحة فيسبوك %page%'
+        no_instagram_linked: لا يوجد حساب انستجرام احترافي مرتبط بهذه الصفحة.
+        how_to_link_instagram: كيفية ربط حساب
+        login_to_list: سجّل الدخول باستخدام فيسبوك لعرض صفحاتك
+        login_to_list_hint:
+            messenger: استخدم حساب فيسبوك مسؤولًا عن الصفحة التي تريد البيع منها.
+            instagram: تُربط حسابات انستجرام عبر صفحة فيسبوك المرتبطة بها. استخدم حساب فيسبوك مسؤولًا عن تلك الصفحة.
+
+        account_id:
+            messenger: معرّف الصفحة
+            instagram: معرّف حساب انستجرام
+
+        connected:
+            messenger: الصفحات المربوطة
+            instagram: حسابات انستجرام المربوطة
+        available:
+            messenger: صفحاتك على فيسبوك
+            instagram: حساباتك على انستجرام
+        none_connected:
+            messenger: لم تُربط أي صفحة بعد
+            instagram: لم يُربط أي حساب انستجرام بعد
+        none_connected_hint:
+            messenger: اربط إحدى صفحاتك على فيسبوك من الأسفل وسيبدأ الروبوت بالرد على رسائلها.
+            instagram: اربط أحد حساباتك الاحترافية على انستجرام من الأسفل وسيبدأ الروبوت بالرد على رسائله.
+
+        delivery:
+            ok: تستقبل الرسائل
+            ok_help: تُرسل ميتا رسائل هذه الصفحة إلى متجرك.
+            token_invalid: يلزم إعادة الربط
+            token_invalid_help: لم يعد فيسبوك يقبل صلاحية هذه الصفحة. يحدث هذا عند إزالة التطبيق من الصفحة أو تغيير كلمة مرور المسؤول. سجّل الدخول باستخدام فيسبوك واربط الصفحة من جديد.
+            not_subscribed: لا تستقبل الرسائل
+            not_subscribed_help: الصفحة مربوطة لكن ميتا لا ترسل رسائلها إلى المتجر. استخدم زر الإصلاح لإعادة الاشتراك.
+            unknown: الحالة غير معروفة
+            unknown_help: تعذّر الاستعلام من فيسبوك عن هذه الصفحة الآن.
+
+        no_pages:
+            title: لا يعرض فيسبوك أي صفحة لهذا الحساب
+            body: 'تم تسجيل دخول %name%، لكن فيسبوك لم يُرجع أي صفحة يمكنه إدارتها.'
+            step1: تأكد من أن حساب فيسبوك هذا مسؤول عن الصفحة نفسها، وليس فقط عن حافظة الأعمال التي تملكها.
+            step2: سجّل الخروج من فيسبوك هنا ثم سجّل الدخول من جديد، واختر الصفحات عندما يسألك فيسبوك عن الصفحات التي تريد مشاركتها.
+            step3: إذا أُزيل التطبيق من الحساب، افتح عمليات تكامل الأعمال وأزله، ثم سجّل الدخول من جديد.
+            business_integrations: فتح عمليات تكامل الأعمال
+
+        not_configured:
+            title: تطبيق ميتا غير مُعدّ
+            body: أضف بيانات تطبيق ميتا إلى متغيرات بيئة المتجر، ثم أعد تحميل هذه الصفحة.
+
+        setup:
+            title: إعداد تطبيق ميتا
+            intro:
+                messenger: في تطبيق ميتا، أضف منتج ماسنجر ثم استخدم هذه القيم.
+                instagram: في تطبيق ميتا، أضف انستجرام (واجهة ماسنجر لانستجرام) ثم استخدم هذه القيم.
+            callback_url: رابط استدعاء Webhook
+            callback_url_help:
+                messenger: 'اشترك في الكائن "page" بالحقلين messages وmessaging_postbacks، واستخدم قيمة FACEBOOK_VERIFICATION كرمز التحقق.'
+                instagram: 'اشترك في الكائن "instagram" بالحقلين messages وmessaging_postbacks، واستخدم قيمة FACEBOOK_VERIFICATION كرمز التحقق.'
+            redirect_uri: رابط إعادة توجيه OAuth صالح
+            redirect_uri_help: أضفه في إعدادات تسجيل الدخول بفيسبوك حتى يعود زر "المتابعة باستخدام فيسبوك" إلى هنا.
+            guide: دليل الإعداد خطوة بخطوة
+
+        settings:
+            title: إعدادات الروبوت
+            menu: القائمة
+            selling: البيع
+            greeting: رسالة الترحيب
+            greeting_help: 'تظهر قبل أول رسالة. يُستبدل {{user_first_name}} بالاسم الأول للعميل. بحد أقصى 160 حرفًا.'
+            greeting_help_instagram: 'تُرسل عندما يحيّي العميل الروبوت أو يضغط "ابدأ". يُستبدل {{user_first_name}} باسم العميل.'
+            list_products: 'زر "المنتجات"'
+            my_cart: 'زر "سلتي"'
+            empty_cart: 'زر "إفراغ السلة"'
+            checkout: 'زر "إتمام الشراء"'
+            channel: قناة البيع
+            channel_help: تُؤخذ المنتجات والأسعار ورابط إتمام الشراء من هذه القناة.
+            channel_default: أول قناة مفعّلة في المتجر
+            ai_instructions: تعليمات المساعد الذكي
+            ai_instructions_help: تُستخدم فقط عند تثبيت مولّد ردود بالذكاء الاصطناعي. صف الأسلوب واللغة والمواضيع المسموح بها.
+            preview: معاينة
+            save: حفظ ونشر
+
+    chat:
+        fallback: عذرًا، لم أفهم ذلك. كيف يمكنني مساعدتك؟
+        tap_an_option: 'أو اختر أحد الخيارات:'
+        text_commands: 'اكتب "products" للتصفح، أو "cart" لعرض سلتك، أو "checkout" للدفع.'
+        browse_products: تصفّح المنتجات
+        view_cart: سلتي
+        visit_website: زيارة الموقع
+        no_products: لا توجد منتجات متاحة حاليًا.
+        product_not_found: عذرًا، هذا المنتج لم يعد متاحًا.
+        cannot_add: 'عذرًا، لا يمكن إضافة %product% الآن. قد يكون غير متوفر.'
+        added_to_cart: 'تمت إضافة %product% إلى سلتك 🛒'
+        removed_from_cart: 'تمت إزالة %product% من سلتك.'
+        item_not_found: هذا المنتج لم يعد في سلتك.
+        cart_empty: سلتك فارغة.
+        cart_cleared: أصبحت سلتك فارغة.
+        checkout_prompt: 'جاهز لإتمام الشراء؟ الإجمالي %total%.'
+        checkout_button: إتمام الشراء
+        continue_shopping: متابعة التسوق
+        nothing_in_stock: عذرًا، لا يتوفر لدينا ما يطابق طلبك حاليًا 🙏
+        add_to_cart: أضف إلى السلة
+        choose_options: اختر المواصفات
+        view_on_website: عرض على الموقع
+        remove_from_cart: إزالة
+        see_more: المزيد
+        cart_item_subtitle: '%quantity% × · %price%'
+        products_heading: 'منتجاتنا:'
+        products_more: 'اكتب "products %page%" لعرض المزيد.'

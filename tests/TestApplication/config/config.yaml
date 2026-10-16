@@ -1,0 +1,24 @@
+imports:
+    - { resource: "@SyliusBotPlugin/config/config.yaml" }
+
+parameters:
+    env(FACEBOOK_APP_ID): 'test-app-id'
+    env(FACEBOOK_APP_SECRET): 'test-app-secret'
+    env(FACEBOOK_VERIFICATION): 'test-verify-token'
+
+when@test:
+    # The functional tests do not need compiled admin/shop assets.
+    webpack_encore:
+        strict_mode: false
+
+    services:
+        Tests\SyliusBotPlugin\Functional\Stub\FakeGraphHttpClient: ~
+
+        sylius_bot.graph_client:
+            class: SyliusBotPlugin\Graph\GraphClient
+            arguments:
+                - '@Tests\SyliusBotPlugin\Functional\Stub\FakeGraphHttpClient'
+                - 'test-app-id'
+                - 'test-app-secret'
+                - 'v23.0'
+                - '@logger'

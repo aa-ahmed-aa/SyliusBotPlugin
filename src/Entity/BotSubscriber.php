@@ -4,260 +4,161 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
-use Sylius\Component\Core\Model\Customer;
 use Sylius\Component\Core\Model\CustomerInterface;
+use Sylius\Resource\Model\TimestampableTrait;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="sylius_bot_plugin_bot_subscriber")
- */
 class BotSubscriber implements BotSubscriberInterface
 {
-    use TimestampableEntity;
+    use TimestampableTrait;
 
-    /**
-     * @var integer | null
-     * @ORM\Id
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    protected $id;
+    protected ?int $id = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="name", type="string", length=255, nullable=true)
-     */
-    public $name;
+    protected ?BotInterface $bot = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="bot_subscriber_id", type="string", length=255, unique=true, nullable=false)
-     */
-    public $botSubscriberId;
+    protected ?string $botSubscriberId = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="channel", type="string", length=255, nullable=false)
-     */
-    public $channel;
+    protected ?string $channel = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="first_name", type="string", length=255, nullable=true)
-     */
-    public $firstName;
+    protected ?string $name = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="last_name", type="string", length=255, nullable=true)
-     */
-    public $lastName;
+    protected ?string $firstName = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="profile_picture", type="string", length=255, nullable=true)
-     */
-    public $profilePicture;
+    protected ?string $lastName = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="locale", type="string", length=255, nullable=true)
-     */
-    public $locale;
+    protected ?string $profilePicture = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="timezone", type="string", length=255, nullable=true)
-     */
-    public $timezone;
+    protected ?string $locale = null;
 
-    /**
-     * @var string | null
-     * @ORM\Column(name="gender", type="string", length=255, nullable=true)
-     */
-    public $gender;
+    protected ?string $timezone = null;
 
-    /**
-     * @var CustomerInterface
-     * @ORM\OneToOne(targetEntity="Sylius\Component\Core\Model\Customer")
-     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id")
-     */
-    public $customer;
+    protected ?string $gender = null;
 
-    public function __construct()
-    {
-        $this->customer = new Customer();
-        $this->createdAt = new \DateTime();
-        $this->updatedAt = new \DateTime();
-    }
+    protected ?CustomerInterface $customer = null;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @param string|null $name
-     */
-    public function setName(?string $name): void
+    public function getBot(): ?BotInterface
     {
-        $this->name = $name;
+        return $this->bot;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getName(): ?string
+    public function setBot(?BotInterface $bot): void
     {
-        return $this->name;
+        $this->bot = $bot;
     }
 
-    /**
-     * @param string|null $firstName
-     */
-    public function setFirstName(?string $firstName): void
-    {
-        $this->firstName = $firstName;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * @param string|null $lastName
-     */
-    public function setLastName(?string $lastName): void
-    {
-        $this->lastName = $lastName;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * @param mixed|null $timezone
-     */
-    public function setTimezone($timezone): void
-    {
-        $this->timezone = (string)$timezone;
-    }
-
-    /**
-     * @return mixed|null
-     */
-    public function getTimezone()
-    {
-        return $this->timezone;
-    }
-
-    /**
-     * @param string|null $profilePicture
-     */
-    public function setProfilePicture(?string $profilePicture): void
-    {
-        $this->profilePicture = $profilePicture;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getProfilePicture(): ?string
-    {
-        return $this->profilePicture;
-    }
-
-    /**
-     * @param string|null $locale
-     */
-    public function setLocale(?string $locale): void
-    {
-        $this->locale = $locale;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getLocale(): ?string
-    {
-        return $this->locale;
-    }
-
-    /**
-     * @param string|null $gender
-     */
-    public function setGender(?string $gender): void
-    {
-        $this->gender = $gender;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getGender(): ?string
-    {
-        return $this->gender;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getBotSubscriberId(): ?string
     {
         return $this->botSubscriberId;
     }
 
-    /**
-     * @param string|null $botSubscriberId
-     */
     public function setBotSubscriberId(?string $botSubscriberId): void
     {
         $this->botSubscriberId = $botSubscriberId;
     }
 
-    /**
-     * @param string|null $channel
-     */
-    public function setChannel(?string $channel): void
-    {
-        $this->channel = $channel;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getChannel(): ?string
     {
         return $this->channel;
     }
 
-    /**
-     * @param CustomerInterface $customer
-     */
-    public function setCustomer(CustomerInterface $customer): void
+    public function setChannel(?string $channel): void
     {
-        $this->customer = $customer;
+        $this->channel = $channel;
     }
 
-    /**
-     * @return CustomerInterface
-     */
-    public function getCustomer(): CustomerInterface
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(?string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(?string $firstName): void
+    {
+        $this->firstName = $firstName;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(?string $lastName): void
+    {
+        $this->lastName = $lastName;
+    }
+
+    public function getDisplayName(): string
+    {
+        $name = trim((string) $this->name);
+        if ($name !== '') {
+            return $name;
+        }
+
+        $name = trim($this->firstName . ' ' . $this->lastName);
+
+        return $name !== '' ? $name : '#' . $this->id;
+    }
+
+    public function getProfilePicture(): ?string
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?string $profilePicture): void
+    {
+        $this->profilePicture = $profilePicture;
+    }
+
+    public function getLocale(): ?string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(?string $locale): void
+    {
+        $this->locale = $locale;
+    }
+
+    public function getTimezone(): ?string
+    {
+        return $this->timezone;
+    }
+
+    public function setTimezone(?string $timezone): void
+    {
+        $this->timezone = $timezone;
+    }
+
+    public function getGender(): ?string
+    {
+        return $this->gender;
+    }
+
+    public function setGender(?string $gender): void
+    {
+        $this->gender = $gender;
+    }
+
+    public function getCustomer(): ?CustomerInterface
     {
         return $this->customer;
+    }
+
+    public function setCustomer(?CustomerInterface $customer): void
+    {
+        $this->customer = $customer;
     }
 }

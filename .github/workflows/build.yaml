@@ -1,0 +1,83 @@
+name: Build
+
+on:
+    push:
+        branches-ignore:
+            - 'dependabot/**'
+    pull_request: ~
+    release:
+        types: [created]
+    schedule:
+        - cron: "0 1 * * 6" # 1am every Saturday
+    workflow_dispatch: ~
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+
+        name: "Sylius ${{ matrix.sylius }}, PHP ${{ matrix.php }}, MySQL ${{ matrix.mysql }}"
+
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - { php: "8.2", sylius: "~2.1.0", mysql: "8.0" }
+                    - { php: "8.2", sylius: "~2.2.0", mysql: "8.4" }
+                    - { php: "8.3", sylius: "~2.1.0", mysql: "8.4" }
+                    - { php: "8.3", sylius: "~2.3.0", mysql: "8.4" }
+
+        env:
+            APP_ENV: test
+            DATABASE_URL: "mysql://root:root@127.0.0.1/sylius_bot_plugin_test?serverVersion=${{ matrix.mysql }}"
+
+        services:
+            mysql:
+                image: "mysql:${{ matrix.mysql }}"
+                env:
+                    MYSQL_ROOT_PASSWORD: root
+                ports:
+                    - 3306:3306
+                options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=5s --health-retries=10
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "${{ matrix.php }}"
+                  extensions: intl, gd, pdo_mysql
+                  tools: composer:v2
+                  coverage: none
+
+            - name: Restrict Sylius version
+              run: composer require "sylius/sylius:${{ matrix.sylius }}" --no-update --no-scripts --no-interaction
+
+            - name: Install PHP dependencies
+              run: composer update --no-interaction --no-progress
+
+            - name: Coding standard
+              run: vendor/bin/ecs check
+
+            - name: Static analysis
+              run: vendor/bin/phpstan analyse --no-progress
+
+            - name: Unit tests
+              run: vendor/bin/phpunit --testsuite unit
+
+            - name: Prepare the database
+              run: |
+                  vendor/bin/console doctrine:database:create
+                  vendor/bin/console doctrine:migrations:migrate -n
+                  # The plugin's tables must match its mapping after migrating. (Not
+                  # doctrine:schema:validate: some Sylius minors fail it on their own mapping.)
+                  ! vendor/bin/console doctrine:schema:update --dump-sql | grep sylius_bot_plugin
+                  vendor/bin/console sylius:fixtures:load -n
+
+            - name: Lint the container, Twig and YAML
+              run: |
+                  vendor/bin/console lint:container
+                  vendor/bin/console lint:twig templates
+                  vendor/bin/console lint:yaml config translations --parse-tags
+
+            - name: Functional tests
+              run: vendor/bin/phpunit --testsuite functional

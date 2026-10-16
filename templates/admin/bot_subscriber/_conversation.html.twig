@@ -1,0 +1,28 @@
+{% if messages is empty %}
+    <div class="empty">
+        <div class="empty-icon">{{ ux_icon('tabler:send', {class: 'icon'}) }}</div>
+        <p class="empty-title">{{ 'sylius_bot.ui.no_messages'|trans }}</p>
+        <p class="empty-subtitle text-secondary">{{ 'sylius_bot.ui.no_messages_hint'|trans }}</p>
+    </div>
+{% else %}
+    <div class="sylius-bot-chat card-body">
+        {% set last_day = null %}
+        {% for message in messages %}
+            {% set day = message.createdAt|date('Y-m-d') %}
+            {% if day != last_day %}
+                <div class="sylius-bot-chat__divider">{{ message.createdAt|format_date('full') }}</div>
+                {% set last_day = day %}
+            {% endif %}
+
+            <div class="sylius-bot-chat__row {{ message.inbound ? 'sylius-bot-chat__row--in' : 'sylius-bot-chat__row--out' }}">
+                <div class="sylius-bot-chat__bubble">
+                    <div class="sylius-bot-chat__text">{{ message.text }}</div>
+                    <div class="sylius-bot-chat__meta">
+                        {{ message.inbound ? subscriber.displayName : (subscriber.bot ? subscriber.bot.pageName : 'sylius_bot.ui.store'|trans) }}
+                        · {{ message.createdAt|format_time('short') }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

@@ -1,0 +1,2 @@
+sylius_bot:
+    resource: "@SyliusBotPlugin/config/routes.yaml"
