@@ -7,6 +7,10 @@ parameters:
     env(FACEBOOK_VERIFICATION): 'test-verify-token'
 
 when@test:
+    # The functional tests do not need compiled admin/shop assets.
+    webpack_encore:
+        strict_mode: false
+
     services:
         Tests\SyliusBotPlugin\Functional\Stub\FakeGraphHttpClient: ~
 

@@ -35,7 +35,7 @@
 
 | | Version |
 | --- | --- |
-| PHP | 8.2 or newer |
+| PHP | 8.2 or newer (8.3 for Sylius 2.3) |
 | Sylius | 2.1, 2.2, 2.3 |
 | A Meta app | with the Messenger and/or Instagram products |
 | A public HTTPS URL | for Meta's webhooks (use a tunnel such as ngrok when developing) |
