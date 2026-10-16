@@ -1,0 +1,100 @@
+# Import this file from your application, e.g. in config/packages/sylius_bot.yaml:
+#
+#   imports:
+#       - { resource: "@SyliusBotPlugin/config/config.yaml" }
+
+parameters:
+    env(FACEBOOK_APP_ID): ''
+    env(FACEBOOK_APP_SECRET): ''
+    env(FACEBOOK_GRAPH_VERSION): 'v23.0'
+    env(FACEBOOK_VERIFICATION): ''
+
+sylius_bot:
+    facebook:
+        app_id: '%env(FACEBOOK_APP_ID)%'
+        app_secret: '%env(FACEBOOK_APP_SECRET)%'
+        graph_version: '%env(FACEBOOK_GRAPH_VERSION)%'
+        verify_token: '%env(FACEBOOK_VERIFICATION)%'
+
+sylius_resource:
+    resources:
+        sylius_bot.bot:
+            classes:
+                model: SyliusBotPlugin\Entity\Bot
+                interface: SyliusBotPlugin\Entity\BotInterface
+                repository: SyliusBotPlugin\Repository\BotRepository
+        sylius_bot.bot_subscriber:
+            classes:
+                model: SyliusBotPlugin\Entity\BotSubscriber
+                interface: SyliusBotPlugin\Entity\BotSubscriberInterface
+        sylius_bot.bot_message:
+            classes:
+                model: SyliusBotPlugin\Entity\BotMessage
+                interface: SyliusBotPlugin\Entity\BotMessageInterface
+                repository: SyliusBotPlugin\Repository\BotMessageRepository
+
+sylius_grid:
+    grids:
+        sylius_bot_admin_bot_subscriber:
+            driver:
+                name: doctrine/orm
+                options:
+                    class: "%sylius_bot.model.bot_subscriber.class%"
+            sorting:
+                createdAt: desc
+            fields:
+                avatar:
+                    type: twig
+                    label: sylius_bot.ui.picture
+                    path: .
+                    options:
+                        template: "@SyliusBotPlugin/admin/grid/field/avatar.html.twig"
+                name:
+                    type: twig
+                    label: sylius_bot.ui.name
+                    path: .
+                    sortable: name
+                    options:
+                        template: "@SyliusBotPlugin/admin/grid/field/name.html.twig"
+                channel:
+                    type: twig
+                    label: sylius_bot.ui.channel
+                    path: channel
+                    sortable: ~
+                    options:
+                        template: "@SyliusBotPlugin/admin/grid/field/channel.html.twig"
+                customer:
+                    type: twig
+                    label: sylius.ui.customer
+                    path: customer
+                    options:
+                        template: "@SyliusBotPlugin/admin/grid/field/customer.html.twig"
+                createdAt:
+                    type: twig
+                    label: sylius_bot.ui.first_message
+                    path: createdAt
+                    sortable: ~
+                    options:
+                        template: "@SyliusAdmin/shared/grid/field/date.html.twig"
+            filters:
+                search:
+                    type: string
+                    label: sylius.ui.search
+                    options:
+                        fields: [name, firstName, lastName, botSubscriberId]
+                channel:
+                    type: select
+                    label: sylius_bot.ui.channel
+                    form_options:
+                        choices:
+                            sylius_bot.ui.messenger: messenger
+                            sylius_bot.ui.instagram: instagram
+            actions:
+                item:
+                    show:
+                        type: show
+                    delete:
+                        type: delete
+                bulk:
+                    delete:
+                        type: delete

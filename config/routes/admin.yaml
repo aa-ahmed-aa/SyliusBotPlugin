@@ -1,0 +1,84 @@
+sylius_bot_admin_bot_subscriber:
+    resource: |
+        alias: sylius_bot.bot_subscriber
+        section: admin
+        templates: "@SyliusAdmin/shared/crud"
+        only: ['index', 'delete', 'bulkDelete']
+        grid: sylius_bot_admin_bot_subscriber
+        permission: true
+    type: sylius.resource
+    prefix: '/%sylius_admin.path_name%'
+
+sylius_bot_admin_bot_subscriber_show:
+    path: /%sylius_admin.path_name%/bot-subscribers/{id}
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotSubscriberController::show
+    requirements:
+        id: '\d+'
+
+# Declared before the {channel} routes so "facebook" is not read as a channel.
+sylius_bot_admin_facebook_callback:
+    path: /%sylius_admin.path_name%/bots/facebook/callback
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::callback
+
+sylius_bot_admin_bot_index:
+    path: /%sylius_admin.path_name%/bots/{channel}
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::index
+    requirements:
+        channel: messenger|instagram
+
+sylius_bot_admin_facebook_login:
+    path: /%sylius_admin.path_name%/bots/{channel}/login
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::login
+    requirements:
+        channel: messenger|instagram
+
+sylius_bot_admin_facebook_logout:
+    path: /%sylius_admin.path_name%/bots/{channel}/logout
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::logout
+    requirements:
+        channel: messenger|instagram
+
+sylius_bot_admin_bot_connect:
+    path: /%sylius_admin.path_name%/bots/{channel}/connect
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::connect
+    requirements:
+        channel: messenger|instagram
+
+sylius_bot_admin_bot_disconnect:
+    path: /%sylius_admin.path_name%/bots/{channel}/{id}/disconnect
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::disconnect
+    requirements:
+        channel: messenger|instagram
+        id: '\d+'
+
+sylius_bot_admin_bot_repair:
+    path: /%sylius_admin.path_name%/bots/{channel}/{id}/repair
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::repair
+    requirements:
+        channel: messenger|instagram
+        id: '\d+'
+
+sylius_bot_admin_bot_settings:
+    path: /%sylius_admin.path_name%/bots/{channel}/{id}/settings
+    methods: [GET, POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Admin\BotController::settings
+    requirements:
+        channel: messenger|instagram
+        id: '\d+'

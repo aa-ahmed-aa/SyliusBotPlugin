@@ -1,0 +1,31 @@
+# Callback URLs for the Meta app's webhooks. Same controller for both: the
+# body's `object` says which channel a call is for.
+sylius_bot_shop_webhook_messenger_verify:
+    path: /webhook/messenger
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Shop\WebhookController::verify
+
+sylius_bot_shop_webhook_messenger:
+    path: /webhook/messenger
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Shop\WebhookController::receive
+
+sylius_bot_shop_webhook_instagram_verify:
+    path: /webhook/instagram
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Shop\WebhookController::verify
+
+sylius_bot_shop_webhook_instagram:
+    path: /webhook/instagram
+    methods: [POST]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Shop\WebhookController::receive
+
+sylius_bot_shop_checkout:
+    path: /bot_checkout/{tokenValue}
+    methods: [GET]
+    defaults:
+        _controller: SyliusBotPlugin\Controller\Shop\CheckoutController

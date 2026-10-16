@@ -1,0 +1,5 @@
+{% if data %}
+    <a href="{{ path('sylius_admin_customer_show', {id: data.id}) }}">{{ data.fullName|trim|default(data.email) }}</a>
+{% else %}
+    <span class="text-secondary">-</span>
+{% endif %}

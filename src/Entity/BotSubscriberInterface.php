@@ -4,114 +4,59 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Entity;
 
-
 use Sylius\Component\Core\Model\CustomerInterface;
-use Sylius\Component\Resource\Model\ResourceInterface;
+use Sylius\Resource\Model\ResourceInterface;
+use Sylius\Resource\Model\TimestampableInterface;
 
-interface BotSubscriberInterface extends ResourceInterface
+/**
+ * A person who messaged one of the store's pages or Instagram accounts.
+ */
+interface BotSubscriberInterface extends ResourceInterface, TimestampableInterface
 {
-    /**
-     * @return mixed
-     */
-    public function getId();
+    public function getBot(): ?BotInterface;
 
-    /**
-     * @param string|null $name
-     */
-    public function setName(?string $name): void;
+    public function setBot(?BotInterface $bot): void;
 
-    /**
-     * @return string|null
-     */
-    public function getName(): ?string;
-
-    /**
-     * @param string|null $firstName
-     */
-    public function setFirstName(?string $firstName): void;
-
-    /**
-     * @return string|null
-     */
-    public function getFirstName(): ?string;
-
-    /**
-     * @param string|null $lastName
-     */
-    public function setLastName(?string $lastName): void;
-
-    /**
-     * @return string|null
-     */
-    public function getLastName(): ?string;
-
-    /**
-     * @param mixed|null $timezone
-     */
-    public function setTimezone($timezone): void;
-
-    /**
-     * @return mixed|null
-     */
-    public function getTimezone();
-
-    /**
-     * @param string|null $profilePicture
-     */
-    public function setProfilePicture(?string $profilePicture): void;
-
-    /**
-     * @return string|null
-     */
-    public function getProfilePicture(): ?string;
-
-    /**
-     * @param string|null $locale
-     */
-    public function setLocale(?string $locale): void;
-
-    /**
-     * @return string|null
-     */
-    public function getLocale(): ?string;
-
-    /**
-     * @param string|null $gender
-     */
-    public function setGender(?string $gender): void;
-
-    /**
-     * @return string|null
-     */
-    public function getGender(): ?string;
-
-    /**
-     * @return string|null
-     */
+    /** Page-scoped id (PSID) on Messenger, Instagram-scoped id (IGSID) on Instagram. */
     public function getBotSubscriberId(): ?string;
 
-    /**
-     * @param string|null $botSubscriberId
-     */
     public function setBotSubscriberId(?string $botSubscriberId): void;
 
-    /**
-     * @param string|null $channel
-     */
-    public function setChannel(?string $channel): void;
-
-    /**
-     * @return string|null
-     */
     public function getChannel(): ?string;
 
-    /**
-     * @param CustomerInterface $customer
-     */
-    public function setCustomer(CustomerInterface $customer): void;
+    public function setChannel(?string $channel): void;
 
-    /**
-     * @return CustomerInterface
-     */
-    public function getCustomer(): CustomerInterface;
+    public function getName(): ?string;
+
+    public function setName(?string $name): void;
+
+    public function getFirstName(): ?string;
+
+    public function setFirstName(?string $firstName): void;
+
+    public function getLastName(): ?string;
+
+    public function setLastName(?string $lastName): void;
+
+    public function getDisplayName(): string;
+
+    public function getProfilePicture(): ?string;
+
+    public function setProfilePicture(?string $profilePicture): void;
+
+    public function getLocale(): ?string;
+
+    public function setLocale(?string $locale): void;
+
+    public function getTimezone(): ?string;
+
+    public function setTimezone(?string $timezone): void;
+
+    public function getGender(): ?string;
+
+    public function setGender(?string $gender): void;
+
+    public function getCustomer(): ?CustomerInterface;
+
+    public function setCustomer(?CustomerInterface $customer): void;
 }

@@ -1,0 +1,11 @@
+sylius_bot:
+    ui:
+        flash:
+            not_configured: Set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET before connecting Facebook.
+            logged_in: You are logged in to Facebook. Choose the pages to connect.
+            login_first: Log in with Facebook first.
+            page_not_found: This Page is not among the Pages your Facebook account manages.
+            connected: The bot now answers on this page.
+            disconnected: The page was disconnected.
+            repaired: The page was subscribed again and its menu published.
+            settings_saved: The settings were saved and published to Meta.

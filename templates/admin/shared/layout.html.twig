@@ -1,0 +1,43 @@
+{#
+    Page frame shared by the plugin's admin screens: the regular Sylius admin
+    sidebar, navbar and flashes, with a sticky header like the CRUD pages.
+#}
+{% extends '@SyliusAdmin/shared/layout/base.html.twig' %}
+
+{% block title %}{% block page_title %}{% endblock %} | {{ 'sylius.ui.administration'|trans }}{% endblock %}
+
+{% block body %}
+    {% include '@SyliusAdmin/shared/crud/common/sidebar.html.twig' %}
+    {% include '@SyliusAdmin/shared/crud/common/navbar.html.twig' %}
+
+    <div class="page-wrapper sylius-bot">
+        <div class="container-xl" data-test-sylius-flashes-container="">
+            {% include '@SyliusAdmin/shared/crud/common/content/flashes.html.twig' %}
+        </div>
+
+        <div class="page-header is-sticky" data-sticky-header="">
+            <div class="container-xl">
+                <ol class="breadcrumb" aria-label="breadcrumbs">
+                    <li class="breadcrumb-item"><a href="{{ path('sylius_admin_dashboard') }}">{{ 'sylius.ui.dashboard'|trans }}</a></li>
+                    {% block breadcrumbs %}{% endblock %}
+                </ol>
+                <div class="row g-2 align-items-center mt-1">
+                    <div class="col-12 col-md">
+                        {% block header %}{% endblock %}
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+                            {% block actions %}{% endblock %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <div class="container-xl">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

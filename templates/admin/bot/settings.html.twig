@@ -1,0 +1,125 @@
+{% extends '@SyliusBotPlugin/admin/shared/layout.html.twig' %}
+
+{% import '@SyliusBotPlugin/admin/shared/_macros.html.twig' as bot_ui %}
+
+{% set brand = bot_ui.brand_color(channel) %}
+
+{% block page_title %}{{ 'sylius_bot.ui.settings.title'|trans }} · {{ bot.pageName }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">{{ 'sylius_bot.menu.bots'|trans }}</li>
+    <li class="breadcrumb-item"><a href="{{ path('sylius_bot_admin_bot_index', {channel: channel}) }}">{{ ('sylius_bot.ui.' ~ channel)|trans }}</a></li>
+    <li class="breadcrumb-item active">{{ bot.pageName }}</li>
+{% endblock %}
+
+{% block header %}
+    <div class="d-flex gap-3 align-items-center">
+        {{ bot_ui.avatar(bot.pageImageUrl, channel, bot.pageName, 48) }}
+        <div class="d-flex flex-column gap-1">
+            <h1 class="page-title">{{ bot.pageName }}</h1>
+            <div>{{ bot_ui.channel_badge(channel) }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block actions %}
+    <a href="{{ path('sylius_bot_admin_bot_index', {channel: channel}) }}" class="btn">
+        {{ ux_icon('tabler:arrow-left', {class: 'icon'}) }}
+        {{ 'sylius.ui.back'|trans }}
+    </a>
+{% endblock %}
+
+{% block content %}
+    {% form_theme form '@SyliusAdmin/shared/form_theme.html.twig' %}
+
+    {{ form_start(form, {attr: {novalidate: 'novalidate', id: 'sylius-bot-settings'}}) }}
+    <div class="row g-3">
+        <div class="col-12 col-lg-7">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">{{ 'sylius_bot.ui.settings.menu'|trans }}</h3>
+                </div>
+                <div class="card-body">
+                    {% if channel == 'messenger' %}
+                        {{ form_row(form.greeting) }}
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-6">{{ form_row(form.list_products) }}</div>
+                        <div class="col-md-6">{{ form_row(form.my_cart) }}</div>
+                        <div class="col-md-6">{{ form_row(form.empty_cart) }}</div>
+                        <div class="col-md-6">{{ form_row(form.checkout) }}</div>
+                    </div>
+                    {% if channel == 'instagram' %}
+                        {# Instagram has no greeting screen; the text is used as the welcome reply. #}
+                        {{ form_row(form.greeting, {help: 'sylius_bot.ui.settings.greeting_help_instagram'}) }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">{{ 'sylius_bot.ui.settings.selling'|trans }}</h3>
+                </div>
+                <div class="card-body">
+                    {{ form_row(form.channel_code) }}
+                    {{ form_row(form.ai_instructions) }}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    {{ ux_icon('tabler:check', {class: 'icon'}) }}
+                    {{ 'sylius_bot.ui.settings.save'|trans }}
+                </button>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ 'sylius_bot.ui.settings.preview'|trans }}</h3>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <div class="sylius-bot-preview w-100" style="max-width:340px;">
+                        <div class="d-flex align-items-center gap-2 p-2 border-bottom">
+                            {{ bot_ui.avatar(bot.pageImageUrl, channel, bot.pageName, 32) }}
+                            <div class="fw-medium text-truncate">{{ bot.pageName }}</div>
+                        </div>
+                        <div class="p-3 d-flex flex-column gap-2" style="min-height:300px;background:var(--tblr-bg-surface-secondary);">
+                            <div class="sylius-bot-preview__bubble" data-preview="greeting"></div>
+                            <div class="mt-auto border rounded-3 overflow-hidden bg-white">
+                                <div class="small text-secondary px-3 pt-2">{{ 'sylius_bot.ui.settings.menu'|trans }}</div>
+                                {% for field in ['list_products', 'my_cart', 'empty_cart', 'checkout'] %}
+                                    <div class="px-3 py-2 border-top" data-preview="{{ field }}"></div>
+                                {% endfor %}
+                                <div class="px-3 py-2 border-top">{{ 'sylius_bot.chat.visit_website'|trans }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ form_end(form) }}
+
+    <style>
+        .sylius-bot-preview { border: 1px solid var(--tblr-border-color); border-radius: .75rem; overflow: hidden; background: var(--tblr-bg-surface); }
+        .sylius-bot-preview__bubble { align-self: flex-start; max-width: 85%; padding: .5rem .75rem; border-radius: 1rem 1rem 1rem .25rem; background: {{ brand }}; color: #fff; white-space: pre-wrap; }
+    </style>
+    <script>
+        (function () {
+            var form = document.getElementById('sylius-bot-settings');
+            var render = function () {
+                form.querySelectorAll('[data-preview]').forEach(function (target) { target.textContent = ''; });
+                form.querySelectorAll('input[type=text]').forEach(function (input) {
+                    var key = input.name.replace(/^.*\[(.+)\]$/, '$1');
+                    form.querySelectorAll('[data-preview="' + key + '"]').forEach(function (target) {
+                        target.textContent = key === 'greeting' ? input.value.replace('{{ '{{' }}user_first_name{{ '}}' }}', 'Sara') : input.value;
+                    });
+                });
+            };
+            form.addEventListener('input', render);
+            render();
+        })();
+    </script>
+{% endblock %}

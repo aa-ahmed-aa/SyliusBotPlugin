@@ -1,0 +1,225 @@
+{% extends '@SyliusBotPlugin/admin/shared/layout.html.twig' %}
+
+{% import '@SyliusBotPlugin/admin/shared/_macros.html.twig' as bot_ui %}
+
+{% set brand = bot_ui.brand_color(channel) %}
+{% set is_instagram = channel == 'instagram' %}
+
+{% block page_title %}{{ ('sylius_bot.ui.' ~ channel)|trans }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item">{{ 'sylius_bot.menu.bots'|trans }}</li>
+    <li class="breadcrumb-item active">{{ ('sylius_bot.ui.' ~ channel)|trans }}</li>
+{% endblock %}
+
+{% block header %}
+    <div class="d-flex gap-3 align-items-center">
+        <span class="d-inline-flex align-items-center justify-content-center rounded-3 text-white flex-shrink-0"
+              style="width:48px;height:48px;font-size:24px;background:{{ brand }};">
+            {{ bot_ui.mark(channel) }}
+        </span>
+        <div class="d-flex flex-column gap-1">
+            <h1 class="page-title">{{ ('sylius_bot.ui.' ~ channel)|trans }}</h1>
+            <div class="text-secondary">{{ ('sylius_bot.ui.' ~ channel ~ '_subtitle')|trans }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block actions %}
+    {% if facebook_account %}
+        <span class="d-inline-flex align-items-center text-secondary small">
+            {{ 'sylius_bot.ui.logged_in_as'|trans({'%name%': facebook_account.name}) }}
+        </span>
+        <form method="post" action="{{ path('sylius_bot_admin_facebook_logout', {channel: channel}) }}" class="d-inline">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('sylius_bot_facebook_logout') }}">
+            <button type="submit" class="btn">{{ 'sylius_bot.ui.log_out'|trans }}</button>
+        </form>
+    {% elseif configured %}
+        <a href="{{ path('sylius_bot_admin_facebook_login', {channel: channel}) }}" class="btn text-white" style="background:#1877F2;border-color:#1877F2;">
+            {{ ux_icon('tabler:brand-facebook', {class: 'icon'}) }}
+            {{ 'sylius_bot.ui.continue_with_facebook'|trans }}
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if not configured %}
+        <div class="alert alert-warning" role="alert">
+            <div>
+                <h4 class="alert-title">{{ 'sylius_bot.ui.not_configured.title'|trans }}</h4>
+                <div class="text-secondary">{{ 'sylius_bot.ui.not_configured.body'|trans }}</div>
+                <pre class="mt-2 mb-0">FACEBOOK_APP_ID=…
+FACEBOOK_APP_SECRET=…
+FACEBOOK_VERIFICATION=…</pre>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if facebook_error %}
+        <div class="alert alert-danger" role="alert">
+            <div>
+                <h4 class="alert-title">{{ 'sylius_bot.ui.facebook_error'|trans }}</h4>
+                <div class="text-secondary">{{ facebook_error }}</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-12 col-xl-8">
+            {# Connected pages / accounts #}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h3 class="card-title">{{ ('sylius_bot.ui.connected.' ~ channel)|trans }}</h3>
+                </div>
+                {% if bots is empty %}
+                    <div class="empty">
+                        <div class="empty-icon" style="color:{{ brand }};font-size:2rem;">{{ bot_ui.mark(channel) }}</div>
+                        <p class="empty-title">{{ ('sylius_bot.ui.none_connected.' ~ channel)|trans }}</p>
+                        <p class="empty-subtitle text-secondary">{{ ('sylius_bot.ui.none_connected_hint.' ~ channel)|trans }}</p>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-vcenter card-table">
+                            <tbody>
+                                {% for bot in bots %}
+                                    {% set state = delivery[bot.id]|default('unknown') %}
+                                    <tr>
+                                        <td class="w-1">{{ bot_ui.avatar(bot.pageImageUrl, channel, bot.pageName) }}</td>
+                                        <td>
+                                            <div class="fw-medium">{{ bot.pageName }}</div>
+                                            <div class="text-secondary small">{{ ('sylius_bot.ui.account_id.' ~ channel)|trans }}: {{ bot.pageId }}</div>
+                                        </td>
+                                        <td>{{ bot_ui.delivery_badge(state) }}</td>
+                                        <td class="text-end">
+                                            <div class="d-inline-flex flex-wrap gap-2 justify-content-end">
+                                                {% if state != 'ok' %}
+                                                    <form method="post" action="{{ path('sylius_bot_admin_bot_repair', {channel: channel, id: bot.id}) }}">
+                                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('sylius_bot_repair') }}">
+                                                        <button type="submit" class="btn btn-outline-warning btn-sm">{{ 'sylius_bot.ui.repair'|trans }}</button>
+                                                    </form>
+                                                {% endif %}
+                                                <a href="{{ path('sylius_bot_admin_bot_settings', {channel: channel, id: bot.id}) }}" class="btn btn-sm">
+                                                    {{ ux_icon('tabler:adjustments', {class: 'icon'}) }}
+                                                    {{ 'sylius_bot.ui.settings.title'|trans }}
+                                                </a>
+                                                <form method="post" action="{{ path('sylius_bot_admin_bot_disconnect', {channel: channel, id: bot.id}) }}"
+                                                      onsubmit="return confirm('{{ 'sylius_bot.ui.confirm_disconnect'|trans|e('js') }}');">
+                                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('sylius_bot_disconnect') }}">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm">{{ 'sylius_bot.ui.disconnect'|trans }}</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Pages the logged-in admin manages #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ ('sylius_bot.ui.available.' ~ channel)|trans }}</h3>
+                </div>
+                {% if not facebook_account %}
+                    <div class="empty">
+                        <p class="empty-title">{{ 'sylius_bot.ui.login_to_list'|trans }}</p>
+                        <p class="empty-subtitle text-secondary">{{ ('sylius_bot.ui.login_to_list_hint.' ~ channel)|trans }}</p>
+                        {% if configured %}
+                            <div class="empty-action">
+                                <a href="{{ path('sylius_bot_admin_facebook_login', {channel: channel}) }}" class="btn text-white" style="background:#1877F2;border-color:#1877F2;">
+                                    {{ ux_icon('tabler:brand-facebook', {class: 'icon'}) }}
+                                    {{ 'sylius_bot.ui.continue_with_facebook'|trans }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif pages is empty %}
+                    <div class="card-body">
+                        <h4>{{ 'sylius_bot.ui.no_pages.title'|trans }}</h4>
+                        <p class="text-secondary">{{ 'sylius_bot.ui.no_pages.body'|trans({'%name%': facebook_account.name}) }}</p>
+                        <ol class="text-secondary mb-3">
+                            <li>{{ 'sylius_bot.ui.no_pages.step1'|trans }}</li>
+                            <li>{{ 'sylius_bot.ui.no_pages.step2'|trans }}</li>
+                            <li>{{ 'sylius_bot.ui.no_pages.step3'|trans }}</li>
+                        </ol>
+                        <a href="https://www.facebook.com/settings/?tab=business_tools" target="_blank" rel="noopener" class="btn">
+                            {{ ux_icon('tabler:external-link', {class: 'icon'}) }}
+                            {{ 'sylius_bot.ui.no_pages.business_integrations'|trans }}
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="list-group list-group-flush">
+                        {% for page in pages %}
+                            {% set account_id = is_instagram ? page.instagramId : page.id %}
+                            {% set connected = account_id and account_id in connected_ids %}
+                            <div class="list-group-item">
+                                <div class="row align-items-center g-3">
+                                    <div class="col-auto">
+                                        {{ bot_ui.avatar(is_instagram ? page.instagramPictureUrl : page.pictureUrl, channel, page.name) }}
+                                    </div>
+                                    <div class="col text-truncate">
+                                        {% if is_instagram %}
+                                            {% if page.hasInstagram %}
+                                                <div class="fw-medium">@{{ page.instagramUsername|default(page.instagramName) }}</div>
+                                                <div class="text-secondary small">{{ 'sylius_bot.ui.linked_to_page'|trans({'%page%': page.name}) }}</div>
+                                            {% else %}
+                                                <div class="fw-medium">{{ page.name }}</div>
+                                                <div class="text-secondary small">{{ 'sylius_bot.ui.no_instagram_linked'|trans }}</div>
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="fw-medium">{{ page.name }}</div>
+                                            <div class="text-secondary small">{{ 'sylius_bot.ui.account_id.messenger'|trans }}: {{ page.id }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-auto">
+                                        {% if connected %}
+                                            <span class="badge bg-green-lt">{{ ux_icon('tabler:check', {class: 'icon icon-sm'}) }} {{ 'sylius_bot.ui.connected_badge'|trans }}</span>
+                                        {% elseif not is_instagram or page.hasInstagram %}
+                                            <form method="post" action="{{ path('sylius_bot_admin_bot_connect', {channel: channel}) }}">
+                                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('sylius_bot_connect') }}">
+                                                <input type="hidden" name="page_id" value="{{ page.id }}">
+                                                <button type="submit" class="btn btn-primary btn-sm">{{ 'sylius_bot.ui.connect'|trans }}</button>
+                                            </form>
+                                        {% else %}
+                                            <a href="https://help.instagram.com/570895513091465" target="_blank" rel="noopener" class="btn btn-sm">
+                                                {{ 'sylius_bot.ui.how_to_link_instagram'|trans }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-4">
+            {# What to paste into the Meta app #}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{ 'sylius_bot.ui.setup.title'|trans }}</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-secondary">{{ ('sylius_bot.ui.setup.intro.' ~ channel)|trans }}</p>
+
+                    <label class="form-label">{{ 'sylius_bot.ui.setup.callback_url'|trans }}</label>
+                    <input type="text" class="form-control mb-1" value="{{ webhook_url }}" readonly onclick="this.select();">
+                    <div class="form-hint mb-3">{{ ('sylius_bot.ui.setup.callback_url_help.' ~ channel)|trans }}</div>
+
+                    <label class="form-label">{{ 'sylius_bot.ui.setup.redirect_uri'|trans }}</label>
+                    <input type="text" class="form-control mb-1" value="{{ callback_url }}" readonly onclick="this.select();">
+                    <div class="form-hint">{{ 'sylius_bot.ui.setup.redirect_uri_help'|trans }}</div>
+                </div>
+                <div class="card-footer">
+                    <a href="https://github.com/aa-ahmed-aa/SyliusBotPlugin/blob/1.12/docs/meta-app-setup.md" target="_blank" rel="noopener">
+                        {{ ux_icon('tabler:external-link', {class: 'icon icon-sm'}) }}
+                        {{ 'sylius_bot.ui.setup.guide'|trans }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

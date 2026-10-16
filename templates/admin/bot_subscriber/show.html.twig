@@ -1,0 +1,109 @@
+{% extends '@SyliusBotPlugin/admin/shared/layout.html.twig' %}
+
+{% import '@SyliusBotPlugin/admin/shared/_macros.html.twig' as bot_ui %}
+
+{% block page_title %}{{ subscriber.displayName }} | {{ 'sylius_bot.ui.bot_subscribers'|trans }}{% endblock %}
+
+{% block breadcrumbs %}
+    <li class="breadcrumb-item"><a href="{{ path('sylius_bot_admin_bot_subscriber_index') }}">{{ 'sylius_bot.ui.bot_subscribers'|trans }}</a></li>
+    <li class="breadcrumb-item active">{{ subscriber.displayName }}</li>
+{% endblock %}
+
+{% block header %}
+    <div class="d-flex gap-3 align-items-center">
+        {{ bot_ui.avatar(subscriber.profilePicture, subscriber.channel, subscriber.displayName, 50) }}
+        <div class="d-flex flex-column gap-1">
+            <h1 class="page-title">{{ subscriber.displayName }}</h1>
+            <div>{{ bot_ui.channel_badge(subscriber.channel) }}</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block actions %}
+    <a href="{{ path('sylius_bot_admin_bot_subscriber_index') }}" class="btn">
+        {{ ux_icon('tabler:arrow-left', {class: 'icon'}) }}
+        {{ 'sylius.ui.back'|trans }}
+    </a>
+    {% if customer %}
+        <a href="{{ path('sylius_admin_customer_show', {id: customer.id}) }}" class="btn btn-primary">
+            {{ ux_icon('tabler:user', {class: 'icon'}) }}
+            {{ 'sylius_bot.ui.view_customer'|trans }}
+        </a>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="row g-3">
+        <div class="col-12 col-lg-4">
+            {% include '@SyliusBotPlugin/admin/bot_subscriber/_details.html.twig' %}
+        </div>
+
+        <div class="col-12 col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" data-bs-toggle="tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#conversation" role="tab" aria-controls="conversation" aria-selected="true">
+                                {{ ux_icon('tabler:send', {class: 'icon me-2'}) }}
+                                {{ 'sylius_bot.ui.conversation'|trans }}
+                                <span class="badge bg-secondary-lt ms-2">{{ messages|length }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false">
+                                {{ ux_icon('tabler:shopping-bag', {class: 'icon me-2'}) }}
+                                {{ 'sylius.ui.orders'|trans }}
+                                <span class="badge bg-secondary-lt ms-2">{{ orders|length }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="conversation" role="tabpanel">
+                        {% include '@SyliusBotPlugin/admin/bot_subscriber/_conversation.html.twig' %}
+                    </div>
+                    <div class="tab-pane fade" id="orders" role="tabpanel">
+                        {% include '@SyliusBotPlugin/admin/bot_subscriber/_orders.html.twig' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .sylius-bot-chat { max-height: 65vh; overflow-y: auto; background: var(--tblr-bg-surface-secondary); }
+        .sylius-bot-chat__row { display: flex; margin-bottom: .5rem; }
+        .sylius-bot-chat__row--out { justify-content: flex-end; }
+        .sylius-bot-chat__bubble { max-width: 75%; padding: .5rem .75rem; border-radius: 1rem; overflow-wrap: anywhere; line-height: 1.45; }
+        .sylius-bot-chat__row--in .sylius-bot-chat__bubble { background: var(--tblr-bg-surface); border: 1px solid var(--tblr-border-color); border-end-start-radius: .25rem; }
+        .sylius-bot-chat__row--out .sylius-bot-chat__bubble { background: var(--tblr-primary); color: #fff; border-end-end-radius: .25rem; }
+        .sylius-bot-chat__text { white-space: pre-wrap; }
+        .sylius-bot-chat__meta { font-size: .75rem; opacity: .7; margin-top: .25rem; text-align: end; white-space: nowrap; }
+        .sylius-bot-chat__divider { display: flex; align-items: center; gap: .75rem; margin: 1rem 0 .75rem; font-size: .75rem; color: var(--tblr-secondary); }
+        .sylius-bot-chat__divider::before, .sylius-bot-chat__divider::after { content: ''; flex: 1; border-top: 1px solid var(--tblr-border-color); }
+    </style>
+
+    <script>
+        (function () {
+            // Open the tab named in the URL hash (#orders), keep the hash in sync,
+            // and start the conversation scrolled to its latest message.
+            var chat = document.querySelector('.sylius-bot-chat');
+            var scrollChat = function () { if (chat) { chat.scrollTop = chat.scrollHeight; } };
+            var links = document.querySelectorAll('.sylius-bot [data-bs-toggle="tab"]');
+
+            links.forEach(function (link) {
+                link.addEventListener('shown.bs.tab', function () {
+                    history.replaceState(null, '', link.getAttribute('href'));
+                    if (link.getAttribute('href') === '#conversation') { scrollChat(); }
+                });
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var target = window.location.hash && document.querySelector('.sylius-bot [data-bs-toggle="tab"][href="' + window.location.hash + '"]');
+                if (target) { target.click(); }
+                scrollChat();
+            });
+        })();
+    </script>
+{% endblock %}

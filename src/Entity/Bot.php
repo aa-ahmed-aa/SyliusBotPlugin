@@ -4,238 +4,153 @@ declare(strict_types=1);
 
 namespace SyliusBotPlugin\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Sylius\Resource\Model\TimestampableTrait;
 
-/**
- * @ORM\Entity
- * @ORM\Table(name="sylius_bot_plugin_bot")
- */
 class Bot implements BotInterface
 {
-    use TimestampableEntity;
+    use TimestampableTrait;
 
     /**
-     * @var integer | null
-     * @ORM\Id
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
+     * Labels and texts a merchant can change per page. Missing keys fall back
+     * to these, so a bot saved by an older version still renders a full menu.
      */
-    protected $id;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="page_name", type="string", length=255, nullable=true)
-     */
-    protected $page_name;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="user_id", type="string", length=255, nullable=true)
-     */
-    protected $user_id;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="page_access_token", type="string", length=255, nullable=true)
-     */
-    protected $page_access_token;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="page_id", type="string", length=255, nullable=true)
-     */
-    protected $page_id;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="page_image_url", type="text", nullable=true)
-     */
-    protected $page_image_url;
-
-    /**
-     * @var bool | null
-     * @ORM\Column(name="disabled", type="boolean", nullable=true, options={"default": false})
-     */
-    protected $disabled;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="channel_type", type="string", length=255, nullable=true)
-     */
-    protected $channel_type;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="timezone", type="string", length=255, nullable=true)
-     */
-    protected $timezone;
-
-    /**
-     * @var string | null
-     * @ORM\Column(name="persistent_menu", type="text", nullable=true)
-     */
-    protected $persistent_menu;
-
-    /** @var array $PERSISTENT_MENU_FALLBACK */
-    public const PERSISTENT_MENU_FALLBACK = [
-        "list_products" => "List products",
-        "order_summery" => "Order summery",
-        "my_cart" => "My cart",
-        "empty_cart" => "Empty cart",
-        "checkout" => "Checkout",
-        "get_started_text" => "Hello {{user_first_name}}!"
+    public const DEFAULT_SETTINGS = [
+        'list_products' => 'List products 📦',
+        'my_cart' => 'My cart 🛒',
+        'empty_cart' => 'Empty cart 🗑️',
+        'checkout' => 'Checkout 💳',
+        'greeting' => 'Hello {{user_first_name}}! 👋',
+        'channel_code' => '',
+        'ai_instructions' => '',
     ];
 
-    /**
-     * @return int
-     */
-    public function getId(): int
+    protected ?int $id = null;
+
+    protected ?string $pageName = null;
+
+    protected ?string $pageId = null;
+
+    protected ?string $pageAccessToken = null;
+
+    protected ?string $pageImageUrl = null;
+
+    protected ?string $channelType = null;
+
+    protected ?string $facebookPageId = null;
+
+    protected bool $disabled = false;
+
+    /** JSON, kept in the column 1.x called `persistent_menu`. */
+    protected ?string $settings = null;
+
+    public function getId(): ?int
     {
-        return (int)$this->id;
+        return $this->id;
     }
 
-    /**
-     * @param string $page_name
-     */
-    public function setPageName(string $page_name): void
+    public function getPageName(): ?string
     {
-        $this->page_name = $page_name;
+        return $this->pageName;
     }
 
-    /**
-     * @return string
-     */
-    public function getPageName(): string
+    public function setPageName(?string $pageName): void
     {
-        return (string)$this->page_name;
+        $this->pageName = $pageName;
     }
 
-    /**
-     * @param string $page_id
-     */
-    public function setPageId(string $page_id): void
+    public function getPageId(): ?string
     {
-        $this->page_id = $page_id;
+        return $this->pageId;
     }
 
-    /**
-     * @return string
-     */
-    public function getPageId(): string
+    public function setPageId(?string $pageId): void
     {
-        return (string)$this->page_id;
+        $this->pageId = $pageId;
     }
 
-    /**
-     * @param string $page_access_token
-     */
-    public function setPageAccessToken(string $page_access_token): void
+    public function getPageAccessToken(): ?string
     {
-        $this->page_access_token = $page_access_token;
+        return $this->pageAccessToken;
     }
 
-    /**
-     * @return string
-     */
-    public function getPageAccessToken(): string
+    public function setPageAccessToken(?string $pageAccessToken): void
     {
-        return (string)$this->page_access_token;
+        $this->pageAccessToken = $pageAccessToken;
     }
 
-    /**
-     * @param string $page_image_url
-     */
-    public function setPageImageUrl(string $page_image_url): void
+    public function getPageImageUrl(): ?string
     {
-        $this->page_image_url = $page_image_url;
+        return $this->pageImageUrl;
     }
 
-    /**
-     * @return string
-     */
-    public function getPageImageUrl(): string
+    public function setPageImageUrl(?string $pageImageUrl): void
     {
-        return (string)$this->page_image_url;
+        $this->pageImageUrl = $pageImageUrl;
     }
 
-    /**
-     * @param bool $disabled
-     */
+    public function getChannelType(): ?string
+    {
+        return $this->channelType;
+    }
+
+    public function setChannelType(?string $channelType): void
+    {
+        $this->channelType = $channelType;
+    }
+
+    public function getFacebookPageId(): ?string
+    {
+        return $this->facebookPageId;
+    }
+
+    public function setFacebookPageId(?string $facebookPageId): void
+    {
+        $this->facebookPageId = $facebookPageId;
+    }
+
+    public function isDisabled(): bool
+    {
+        return $this->disabled;
+    }
+
     public function setDisabled(bool $disabled): void
     {
         $this->disabled = $disabled;
     }
 
-    /**
-     * @return bool
-     */
-    public function getDisabled(): bool
+    public function getSettings(): array
     {
-        return (bool)$this->disabled;
+        $stored = json_decode((string) $this->settings, true);
+        $stored = is_array($stored) ? $stored : [];
+
+        // 1.x stored the greeting as `get_started_text` and the sales channel as `channel`.
+        $stored['greeting'] ??= $stored['get_started_text'] ?? null;
+        $stored['channel_code'] ??= $stored['channel'] ?? null;
+        $stored['ai_instructions'] ??= $stored['custom_prompt'] ?? null;
+
+        $settings = [];
+        foreach (self::DEFAULT_SETTINGS as $key => $default) {
+            $value = $stored[$key] ?? null;
+            $settings[$key] = is_scalar($value) && (string) $value !== '' ? (string) $value : $default;
+        }
+
+        return $settings;
     }
 
-    /**
-     * @param string $channel_type
-     */
-    public function setChannelType(string $channel_type): void
+    public function setSettings(array $settings): void
     {
-        $this->channel_type = $channel_type;
+        $clean = [];
+        foreach (array_keys(self::DEFAULT_SETTINGS) as $key) {
+            $clean[$key] = trim((string) ($settings[$key] ?? ''));
+        }
+
+        // Unicode stays escaped, so emoji labels survive a connection that is
+        // not utf8mb4 (Sylius' default `charset: UTF8` is 3-byte utf8).
+        $this->settings = json_encode($clean, \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
     }
 
-    /**
-     * @return string
-     */
-    public function getChannelType(): string
+    public function getSetting(string $key): string
     {
-        return (string)$this->channel_type;
-    }
-
-    /**
-     * @param string $timezone
-     */
-    public function setTimezone(string $timezone): void
-    {
-        $this->timezone = $timezone;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTimezone(): string
-    {
-        return (string)$this->timezone;
-    }
-
-    /**
-     * @param string $persistent_menu
-     */
-    public function setPersistentMenu(string $persistent_menu): void
-    {
-        $this->persistent_menu = $persistent_menu;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPersistentMenu(): string
-    {
-        return (string)$this->persistent_menu;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getUserId(): ?string
-    {
-        return $this->user_id;
-    }
-
-    /**
-     * @param string|null $user_id
-     */
-    public function setUserId(?string $user_id): void
-    {
-        $this->user_id = $user_id;
+        return $this->getSettings()[$key] ?? '';
     }
 }
