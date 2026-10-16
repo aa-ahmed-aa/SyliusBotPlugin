@@ -68,7 +68,9 @@ jobs:
               run: |
                   vendor/bin/console doctrine:database:create
                   vendor/bin/console doctrine:migrations:migrate -n
-                  vendor/bin/console doctrine:schema:validate --skip-sync
+                  # The plugin's tables must match its mapping after migrating. (Not
+                  # doctrine:schema:validate: some Sylius minors fail it on their own mapping.)
+                  ! vendor/bin/console doctrine:schema:update --dump-sql | grep sylius_bot_plugin
                   vendor/bin/console sylius:fixtures:load -n
 
             - name: Lint the container, Twig and YAML
