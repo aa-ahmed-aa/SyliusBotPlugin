@@ -32,7 +32,7 @@
         "sylius-labs/coding-standard": "^4.4",
         "sylius/test-application": "^2.0.0@alpha",
         "symfony/browser-kit": "^6.4 || ^7.1",
-        "symfony/css-selector": "^6.4 || ^7.1",
+        "symfony/css-selector": "^8.1.10",
         "symfony/debug-bundle": "^6.4 || ^7.1",
         "symfony/dotenv": "^6.4 || ^7.1",
         "symfony/intl": "^6.4 || ^7.1",
